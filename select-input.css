@@ -1,9 +1,9 @@
 :host {
   display: block;
+  position: relative;
 }
 #selectList {
   display: block;
-  position: relative;
   min-width: 11em;
 }
 #selectList > select-input-item {
@@ -25,29 +25,28 @@
 :host([multiple]) #selectList > select-input-item {
   display: inline-block;
   padding-right: 14px;
-  margin-right: 6px;
+  margin-right: 4px;
+  margin-bottom: 1px;
+  margin-top: 1px;
 }
 #selectList > select-input-item > a {
   display: block;
   position: absolute;
-  top: 13px;
+  top: 50%;
   right: 8px;
   width: 8px;
   height: 8px;
-  border-radius: 4px;
-  /*transform: translateY(-50%);*/
-
+  border-radius: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
   background-color: #666;
   text-decoration: none;
   cursor: pointer;
 }
 :host([multiple]) #selectList > select-input-item > a {
-  top: 14px;
   right: 4px;
   width: 6px;
   height: 6px;
-  border-radius: 3px;
-  /*transform: translateY(-50%);*/
 }
 :host([disabled]) {
   pointer-events: none;
@@ -67,8 +66,6 @@
 #placeholder {
   position: absolute;
   left: 0;
-  /*right: 0;*/
-
   top: 0;
   bottom: 0;
   padding: 0;
@@ -89,30 +86,22 @@
   min-width: 1em;
   background: transparent;
 }
-#selectInput:focus {
-  outline-style: none;
+#selectInput {
+  outline-style: none !important;
 }
-#selectDataList {
-  display: block;
+paper-dropdown {
   position: absolute;
   left: 4px;
   right: 4px;
   margin-top: 4px;
-  -webkit-box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
-  -moz-box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
-  box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
-  background-color: #ffffff;
+  top: 100%;
   z-index: 1;
 }
-#selectDataList select-data-item {
-  min-width: 100%;
-  padding: 8px 10px;
-  box-sizing: border-box;
-  cursor: pointer;
+paper-dropdown /deep/ #scroller {
+  width: auto !important;
+  height: auto !important;
+  max-height: auto !important;
 }
-#selectDataList select-data-item.active {
-  background-color: #eee;
-}
-#selectDataList select-data-item.select-data-add {
-  height: 34px;
+core-menu {
+  margin: 0;
 }

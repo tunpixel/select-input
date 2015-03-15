@@ -22,6 +22,9 @@
     font-family: 'Roboto', serif;
     font-weight: 300;
   }
+  pre {
+    font-size: 12px;
+  }
   </style>
   <link rel="stylesheet" href="/_/elements/common/styles/default.css">
 
@@ -47,6 +50,8 @@
 
   <template is="auto-binding">
 
+    <pre>data set: {{data|json}}</pre>
+
     <core-field>
       <label>select input</label>
       <select-input id="selectInput" nonmatching multiple labelField="name">
@@ -56,9 +61,10 @@
       </select-input>
     </core-field>
 
-    <pre>
-value: {{$.selectInput.value|json}}
-    </pre>
+    <!-- <pre>{{$.selectInput.value|json}}</pre> -->
+
+    <pre>[<template repeat="{{item in $.selectInput.value}}">{{item|json}}, </template>]</pre>
+
 
     <core-field>
       <!-- <label>text input</label> -->
@@ -78,9 +84,10 @@ value: {{$.selectInput.value|json}}
       </paper-input-decorator>
     </core-field>
 
-    <pre>
-value: {{$.selectInput_.value|json}}
-    </pre>
+    <!-- <pre>value: {{$.selectInput_.value|json}}</pre> -->
+
+    <pre>value: [<template repeat="{{item in $.selectInput_.value}}">{{item|json}}, </template>]</pre>
+
 
     <core-field>
       <label>select-one input</label>
@@ -91,9 +98,7 @@ value: {{$.selectInput_.value|json}}
       </select-input>
     </core-field>
 
-    <pre>
-value: {{$.selectOneInput.value|json}}
-    </pre>
+    <pre>value: {{$.selectOneInput.value|json}}</pre>
 
     <core-field>
       <label>select-one input</label>
@@ -106,9 +111,7 @@ value: {{$.selectOneInput.value|json}}
       </paper-input-decorator>
     </core-field>
 
-    <pre>
-value: {{$.selectOneInput_.value|json}}
-    </pre>
+    <pre>value: {{$.selectOneInput_.value|json}}</pre>
 
   </template>
 
@@ -121,22 +124,35 @@ value: {{$.selectOneInput_.value|json}}
 
   var data = [{
     id: 1,
-    name: "PHP"
-  }, {
-    id: 2,
-    name: "Java"
-  }, {
-    id: 3,
     name: "Python"
   }, {
-    id: 4,
+    id: 2,
     name: "JavaScript"
   }, {
-    id: 5,
+    id: 3,
     name: "HTML5"
+  }, {
+    id: 4,
+    name: "CSS3"
+  }, {
+    id: 5,
+    name: "AngularJS"
+  }, {
+    id: 6,
+    name: "Polymer"
+  }, {
+    id: 7,
+    name: "PHP"
+  }, {
+    id: 8,
+    name: "Java"
   }];
 
   addEventListener('template-bound', function() {
+
+    var template = document.querySelector('template');
+
+    template.data = data;
 
     var selectInput = document.querySelector('#selectInput');
 
@@ -145,8 +161,7 @@ value: {{$.selectOneInput_.value|json}}
     //   return e.id;
     // });
 
-    selectInput.addEventListener('input', function(e) {
-      console.log(arguments)
+    selectInput.addEventListener('input-changed', function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
       selectInput.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
@@ -158,7 +173,7 @@ value: {{$.selectOneInput_.value|json}}
 
     var selectInput_ = document.querySelector('#selectInput_');
 
-    selectInput_.addEventListener('input', function(e) {
+    selectInput_.addEventListener('input-changed', function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
       selectInput_.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
@@ -169,7 +184,7 @@ value: {{$.selectOneInput_.value|json}}
 
     selectOneInput.value = data[1];
 
-    selectOneInput.addEventListener('input', function(e) {
+    selectOneInput.addEventListener('input-changed', function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
       selectOneInput.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
@@ -178,7 +193,7 @@ value: {{$.selectOneInput_.value|json}}
 
     var selectOneInput_ = document.querySelector('#selectOneInput_');
 
-    selectOneInput_.addEventListener('input', function(e) {
+    selectOneInput_.addEventListener('input-changed', function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
       selectOneInput_.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;

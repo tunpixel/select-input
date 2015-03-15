@@ -1,4 +1,7 @@
 <link href="../polymer/polymer.html" rel="import">
+<link href="../paper-dropdown/paper-dropdown.html" rel="import">
+<link href="../core-menu/core-menu.html" rel="import">
+<link href="../paper-item/paper-item.html" rel="import">
 <!--
 A proper select input for the Polymer word.
 
@@ -34,14 +37,14 @@ A proper select input for the Polymer word.
   <template>
     <style>
     :host {
-      display: block;
+      display: none;
     }
     </style>
     <content></content>
   </template>
 </polymer-element>
 
-<polymer-element name="select-input" attributes="value data">
+<polymer-element name="select-input" attributes="value data" tabindex="0" on-focus="{{_focus}}" on-blur="{{clear}}">
 
   <template>
     <link rel="stylesheet" href="select-input.css">
@@ -51,7 +54,7 @@ A proper select input for the Polymer word.
       <template if="{{multiple}}">
         <template repeat="{{item in value}}">
           <select-input-item value="{{item}}">{{item|labelFilter}}
-            <a on-tap="{{removeTapped}}" tabindex="0"></a>
+            <a on-tap="{{removeTapped}}" on-enter="{{removeTapped}}" tabindex="0"></a>
           </select-input-item>
         </template>
       </template>
@@ -59,7 +62,7 @@ A proper select input for the Polymer word.
       <template if="{{!multiple}}">
         <template if="{{value}}">
           <select-input-item value="{{value}}">{{value|labelFilter}}
-            <a on-tap="{{removeTapped}}" tabindex="0"></a>
+            <a on-tap="{{removeTapped}}" on-enter="{{removeTapped}}" tabindex="0"></a>
           </select-input-item>
         </template>
       </template>
@@ -70,20 +73,23 @@ A proper select input for the Polymer word.
         </div>
       </div>
 
-      <!-- <input id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" placeholder="{{placeholder}}" on-input="{{inputHandler}}" flex> -->
-
-      <div id="selectDataList" i-hidden?="{{!data.length}}">
-        <template if="{{data.length > 0}}">
-          <template repeat="{{item in data}}">
-            <select-data-item on-tap="{{dataItemTapped}}" on-mouseover="{{dataItemHovered}}" value="{{item}}">{{item|labelFilter}}</select-data-item>
-          </template>
-          <!-- <select-data-item class="select-data-add" id="selectDataListAdd">
-            <content></content>
-          </select-data-item> -->
-        </template>
       </div>
 
-    </div>
+      <paper-dropdown id="selectDataList" opened?="{{data.length}}" transition="">
+        <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
+          <template repeat="{{item in data}}">
+            <paper-item>
+              <select-data-item value="{{item}}"></select-data-item>
+              {{item|labelFilter}}
+            </paper-item>
+          </template>
+          <!-- <paper-item>
+            <content></content>
+          </paper-item> -->
+        </core-menu>
+      </paper-dropdown>
+
+
   </template>
 
   <script>
@@ -185,21 +191,38 @@ A proper select input for the Polymer word.
 
     checkValidity: function() {
       this.validity = {
-        valid: !this.hasAttribute('required') || (this.multiple ? this.value && this.value.length : this.value)
+        valid: !this.hasAttribute('required') || !!(this.multiple ? this.value && this.value.length : this.value)
       };
     },
 
     /**
-     * The `input` event is fired when text input is changed
+     * `input` input
      *
-     * @event input
+     * Default is ...
+     *
+     * @property input
+     * @type String
+     * @default ''
+     */
+    get input() {
+      return this.$.selectInput.innerText;
+    },
+
+    set input(value) {
+      this.$.selectInput.innerText = value;
+    },
+
+    /**
+     * The `input-changed` event is fired when text input is changed
+     *
+     * @event input-changed
      * @param {String} detail input value
      */
 
     /**
-     * The `change` event is fired when the select value is changed
+     * The `input` event is fired when the select value is changed
      *
-     * @event change
+     * @event input
      * @param {String} detail select value
      */
 
@@ -218,10 +241,10 @@ A proper select input for the Polymer word.
       this.multipleAttributeHandler();
       this.commit();
 
-      var that = this;
-      this.$.selectInput.addEventListener('blur', function() {
-        this.innerText = '';
-      });
+      // var that = this;
+      // this.$.selectInput.addEventListener('blur', function() {
+      //   this.innerText = '';
+      // });
     },
 
     domReady: function() {
@@ -232,11 +255,11 @@ A proper select input for the Polymer word.
       this.value = this.value || (this.multiple ? [] : null);
     },
 
-    focus: function() {
+    _focus: function() {
       this.$.selectInput.focus();
     },
 
-    blur: function() {
+    _blur: function() {
       this.$.selectInput.blur();
     },
 
@@ -247,7 +270,7 @@ A proper select input for the Polymer word.
     },
 
     clear: function() {
-      this.$.selectInput.innerText = '';
+      this.input = '';
     },
 
     clearData: function() {
@@ -300,7 +323,7 @@ A proper select input for the Polymer word.
       var oldValue = this.committedValue;
       this.committedValue = this.value;
       this.checkValidity();
-      this.fire('change', {
+      this.fire('input', {
         old: oldValue,
         value: this.value
       });
@@ -321,25 +344,21 @@ A proper select input for the Polymer word.
     },
 
     elementTapped: function(event, detail, sender) {
-      this.focus();
+      this._focus();
     },
 
-    dataItemTapped: function(event, detail, dataItem) {
-      var value = this.valueFilter(dataItem.value);
-      if (this.multiple)
-        this.value.push(value);
-      else
-        this.value = value;
-      this.commit();
-      this.$.selectInput.innerText = '';
-      this.data.length = 0;
-    },
-
-    dataItemHovered: function(event, detail, dataItem) {
-      var active = this.$.selectDataList.querySelector('select-data-item.active');
-      if (active)
-        active.classList.remove('active');
-      dataItem.classList.add('active');
+    dataItemSelected: function(event, detail, sender) {
+      if (detail.isSelected) {
+        var value = this.valueFilter(detail.item.children[0].value);
+        if (this.multiple)
+          this.value.push(value);
+        else
+          this.value = value;
+        this.commit();
+        this.input = '';
+        this.data.length = 0;
+        sender.selected = null;
+      }
     },
 
     removeTapped: function(event, detail, sender) {
@@ -348,7 +367,7 @@ A proper select input for the Polymer word.
       else
         this.value = null;
       this.commit();
-      this.focus();
+      this._focus();
     },
 
     keydownHandler: function(event, detail, selectInput) {
@@ -356,43 +375,43 @@ A proper select input for the Polymer word.
       var activeDataItem, topDataItem, value;
       switch (event.keyCode) {
         case 8: // backspace
-          if (this.multiple && selectInput.innerText.length === 0 && this.value.length > 0) {
+          if (this.multiple && this.input.length === 0 && this.value.length > 0) {
             this.value.pop();
+            this.commit();
           }
           break;
         case 32: // spacebar
           // if (this.allowSpace === true) {
-          //   break;
+          break;
           // }
-          // else fall through
-          // case 44: // comma
+        case 188: // comma
         case 13: // enter
-          activeDataItem = this.$.selectDataList.querySelector('select-data-item.active');
+          activeDataItem = this.$.selectDataListMenu.selectedItem;
           topDataItem = this.$.selectDataList.querySelector('select-data-item');
           if (activeDataItem) {
-            value = this.valueFilter(activeDataItem.value);
+            value = this.valueFilter(activeDataItem.children[0].value);
             if (this.multiple)
               this.value.push(value);
             else
               this.value = value;
             this.commit();
-            this.$.selectInput.innerText = '';
+            this.input = '';
             this.data.length = 0;
-          } else if (topDataItem && (this.$.selectInput.innerText === topDataItem.value[this.labelField])) {
+          } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
             value = this.valueFilter(topDataItem.value);
             if (this.multiple)
               this.value.push(value);
             else
               this.value = value;
             this.commit();
-            this.$.selectInput.innerText = '';
+            this.input = '';
             this.data.length = 0;
-          } else if (this.nonmatching && this.$.selectInput.innerText.length > 0) {
+          } else if (this.nonmatching && this.input.length > 0) {
             value = {};
-            value[this.labelField] = this.$.selectInput.innerText;
+            value[this.labelField] = this.input;
             this.value.push(this.valueFilter(value));
             this.commit();
-            this.$.selectInput.innerText = '';
+            this.input = '';
             this.data.length = 0;
           }
           inputChanged = false;
@@ -407,35 +426,21 @@ A proper select input for the Polymer word.
           inputChanged = false;
           break;
 
-        case 38: // up arrow
-          var prev = getPreviousItem(activeDataItem);
-          activeDataItem = this.$.selectDataList.querySelector('select-data-item.active');
-          if (activeDataItem)
-            activeDataItem.classList.remove('active');
-          if (prev) {
-            prev.classList.add('active');
-          } else {
-            var last = this.$.selectDataList.querySelector('select-data-item:last-of-type');
-            if (last)
-              last.classList.add('active');
-          }
-          inputChanged = false;
-          break;
+          // case 38: // up arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('up arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
 
-        case 40: // down arrow
-          var next = this.$.selectDataList.querySelector('select-data-item.active ~ select-data-item');
-          activeDataItem = this.$.selectDataList.querySelector('select-data-item.active');
-          if (activeDataItem)
-            activeDataItem.classList.remove('active');
-          if (next) {
-            next.classList.add('active');
-          } else {
-            var last = this.$.selectDataList.querySelector('select-data-item');
-            if (last)
-              last.classList.add('active');
-          }
-          inputChanged = false;
-          break;
+          // case 40: // down arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('down arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
       }
     },
 
@@ -443,7 +448,7 @@ A proper select input for the Polymer word.
       var inputChanged = true;
       switch (event.keyCode) {
         case 8: // backspace
-          if (selectInput.innerText.length === 0) {
+          if (this.input.length === 0) {
             inputChanged = false;
           }
           break;
@@ -467,11 +472,12 @@ A proper select input for the Polymer word.
 
     inputHandler: function(e) {
       e.stopPropagation();
+      // this.fireInputChangedEvent();
     },
 
     fireInputChangedEvent: function() {
-      this.fire('input', {
-        value: this.$.selectInput.innerText
+      this.fire('input-changed', {
+        value: this.input
       });
     },
 
@@ -479,9 +485,3 @@ A proper select input for the Polymer word.
   </script>
 
 </polymer-element>
-
-<!-- DONE TODO: implement valueField -->
-<!-- TODO: fully integrate paper-input-decorator (like in paper-input, label/placeholder mainly) -->
-<!-- TODO: rewrite to use paper-dropdown-menu -->
-<!-- TODO: implement properties placeholder required, readonly, disabled, -->
-<!-- TODO: implement methods -reset()-, -clear()-, -blur()-, checkValidity(), setCustomValidity(error)? -->
