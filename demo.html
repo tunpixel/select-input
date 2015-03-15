@@ -1,0 +1,193 @@
+<!--
+    @license
+    Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+    This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+    The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+    The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+    Code distributed by Google as part of the polymer project is also
+    subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>select-input Demo</title>
+
+
+  <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,100,500' rel='stylesheet' type='text/css'>
+  <style>
+  html /deep/ body {
+    font-size: 16px;
+    font-family: 'Roboto', serif;
+    font-weight: 300;
+  }
+  </style>
+  <link rel="stylesheet" href="/_/elements/common/styles/default.css">
+
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="../core-field/core-field.html">
+  <link rel="import" href="../paper-input/paper-input-decorator.html">
+  <link rel="import" href="../paper-button/paper-button.html">
+  <link rel="import" href="select-input.html">
+
+  <style>
+  body {
+    background-color: white !important;
+    padding: 20px;
+  }
+  pre {
+    font-size: 14px;
+  }
+  </style>
+
+</head>
+
+<body unresolved>
+
+  <template is="auto-binding">
+
+    <core-field>
+      <label>select input</label>
+      <select-input id="selectInput" nonmatching multiple labelField="name">
+        <paper-button onclick="console.log('hello')" fit>
+          Add
+        </paper-button>
+      </select-input>
+    </core-field>
+
+    <pre>
+value: {{$.selectInput.value|json}}
+    </pre>
+
+    <core-field>
+      <!-- <label>text input</label> -->
+      <paper-input-decorator label="text input">
+        <input is="core-input">
+      </paper-input-decorator>
+    </core-field>
+
+    <core-field>
+      <!-- <label>select input</label> -->
+      <paper-input-decorator label="select input" floatingLabel autoValidate required error="Must be valid!">
+        <select-input id="selectInput_" labelField="name" multiple required>
+          <paper-button onclick="console.log('hello')">
+            Add
+          </paper-button>
+        </select-input>
+      </paper-input-decorator>
+    </core-field>
+
+    <pre>
+value: {{$.selectInput_.value|json}}
+    </pre>
+
+    <core-field>
+      <label>select-one input</label>
+      <select-input id="selectOneInput" labelField="name">
+        <paper-button onclick="console.log('hello')">
+          Add
+        </paper-button>
+      </select-input>
+    </core-field>
+
+    <pre>
+value: {{$.selectOneInput.value|json}}
+    </pre>
+
+    <core-field>
+      <label>select-one input</label>
+      <paper-input-decorator>
+        <select-input id="selectOneInput_" labelField="name">
+          <paper-button onclick="console.log('hello')">
+            Add
+          </paper-button>
+        </select-input>
+      </paper-input-decorator>
+    </core-field>
+
+    <pre>
+value: {{$.selectOneInput_.value|json}}
+    </pre>
+
+  </template>
+
+  <script>
+  'use strict';
+
+  PolymerExpressions.prototype.json = function(data) {
+    return JSON.stringify(data, null, 2);
+  };
+
+  var data = [{
+    id: 1,
+    name: "PHP"
+  }, {
+    id: 2,
+    name: "Java"
+  }, {
+    id: 3,
+    name: "Python"
+  }, {
+    id: 4,
+    name: "JavaScript"
+  }, {
+    id: 5,
+    name: "HTML5"
+  }];
+
+  addEventListener('template-bound', function() {
+
+    var selectInput = document.querySelector('#selectInput');
+
+    selectInput.value = data.slice(0, 2);
+    // selectInput.value = data.slice(0, 2).map(function(e) {
+    //   return e.id;
+    // });
+
+    selectInput.addEventListener('input', function(e) {
+      console.log(arguments)
+      var input = (e.detail.value || '').trim().toLowerCase();
+      selectInput.data = data.filter(function(item) {
+        return item.name.toLowerCase().indexOf(input) === 0;
+      });
+      // }).map(function(e){
+      //   return e.name;
+      // });
+    });
+
+    var selectInput_ = document.querySelector('#selectInput_');
+
+    selectInput_.addEventListener('input', function(e) {
+      var input = (e.detail.value || '').trim().toLowerCase();
+      selectInput_.data = data.filter(function(item) {
+        return item.name.toLowerCase().indexOf(input) === 0;
+      });
+    });
+
+    var selectOneInput = document.querySelector('#selectOneInput');
+
+    selectOneInput.value = data[1];
+
+    selectOneInput.addEventListener('input', function(e) {
+      var input = (e.detail.value || '').trim().toLowerCase();
+      selectOneInput.data = data.filter(function(item) {
+        return item.name.toLowerCase().indexOf(input) === 0;
+      });
+    });
+
+    var selectOneInput_ = document.querySelector('#selectOneInput_');
+
+    selectOneInput_.addEventListener('input', function(e) {
+      var input = (e.detail.value || '').trim().toLowerCase();
+      selectOneInput_.data = data.filter(function(item) {
+        return item.name.toLowerCase().indexOf(input) === 0;
+      });
+    });
+
+  });
+  </script>
+
+</body>
+
+</html>

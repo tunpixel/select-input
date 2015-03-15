@@ -1,0 +1,27 @@
+{
+  "name": "select-input",
+  "version": "0.0.1",
+  "authors": [
+    "Tunpixel contact@tunpixel.tn"
+  ],
+  "description": "A proper select input for the Polymer word.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "select"
+  ],
+  "main": "select-input.html",
+  "license": "MIT",
+  "homepage": "https://github.com/tunpixel/select-input/",
+  "ignore": [
+    "/.*",
+    "/tests/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.5"
+  },
+  "devDependencies": {
+    "web-component-tester": "*"
+  }
+}

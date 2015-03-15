@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+#selectList {
+  display: block;
+  position: relative;
+  min-width: 11em;
+}
+#selectList > select-input-item {
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  vertical-align: middle;
+  height: 34px;
+  line-height: 34px;
+  border-radius: 17px;
+  padding-left: 12px;
+  padding-right: 20px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  background-color: #E7E7E7;
+  color: #757575;
+  cursor: default;
+}
+:host([multiple]) #selectList > select-input-item {
+  display: inline-block;
+  padding-right: 14px;
+  margin-right: 6px;
+}
+#selectList > select-input-item > a {
+  display: block;
+  position: absolute;
+  top: 13px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  /*transform: translateY(-50%);*/
+
+  background-color: #666;
+  text-decoration: none;
+  cursor: pointer;
+}
+:host([multiple]) #selectList > select-input-item > a {
+  top: 14px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  /*transform: translateY(-50%);*/
+}
+:host([disabled]) {
+  pointer-events: none;
+}
+#selectList > select-input-item > a:hover {
+  background-color: #F44336;
+}
+#selectList > * {
+  width: auto;
+}
+#placeholder-container {
+  display: inline-block;
+  position: relative;
+  background: transparent;
+  z-index: 0;
+}
+#placeholder {
+  position: absolute;
+  left: 0;
+  /*right: 0;*/
+
+  top: 0;
+  bottom: 0;
+  padding: 0;
+  z-index: -1;
+  font: inherit;
+  color: inherit;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+#selectInput {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  vertical-align: middle;
+  height: 34px;
+  line-height: 34px;
+  min-width: 1em;
+  background: transparent;
+}
+#selectInput:focus {
+  outline-style: none;
+}
+#selectDataList {
+  display: block;
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  margin-top: 4px;
+  -webkit-box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
+  -moz-box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
+  box-shadow: 0px 4px 6px 0px rgba(50, 50, 50, 0.75);
+  background-color: #ffffff;
+  z-index: 1;
+}
+#selectDataList select-data-item {
+  min-width: 100%;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+#selectDataList select-data-item.active {
+  background-color: #eee;
+}
+#selectDataList select-data-item.select-data-add {
+  height: 34px;
+}
