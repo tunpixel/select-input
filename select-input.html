@@ -7,13 +7,10 @@ A proper select input for the Polymer word.
 
 ##### Example
 
-    <select-input></select-input>
-
-
-    <select-input labelField="name" flex>
-      <paper-button onclick="console.log('hello')" fit>
+    <select-input labelField="name" multiple on-input-changed="{{inputChanged}}">
+      <paper-item onclick="alert('Element added.')">
         Add
-      </paper-button>
+      </paper-item>
     </select-input>
 
 @element select-input
@@ -73,22 +70,22 @@ A proper select input for the Polymer word.
         </div>
       </div>
 
-      </div>
+    </div>
 
-      <paper-dropdown id="selectDataList" opened?="{{data.length}}" transition="">
-        <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
-          <template repeat="{{item in data}}">
-            <paper-item>
-              <select-data-item value="{{item}}"></select-data-item>
-              {{item|labelFilter}}
-            </paper-item>
-          </template>
-          <!-- <paper-item>
-            <content></content>
-          </paper-item> -->
-        </core-menu>
-      </paper-dropdown>
-
+    <paper-dropdown id="selectDataList" opened?="{{inputValue.length && (_emptyAction || data.length)}}" transition="">
+      <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
+        <template repeat="{{item in data}}">
+          <paper-item>
+            <select-data-item value="{{item}}"></select-data-item>
+            <template if="{{!_template}}">{{item|labelFilter}}</template>
+            <template class="itemTemplate" if="{{_template}}" bind="{{_template}}"></template>
+          </paper-item>
+        </template>
+        <template if="{{_emptyAction && !data.length}}">
+          <content select="paper-item" class="empty-action" i-hidden?="{{data.length}}"></content>
+        </template>
+      </core-menu>
+    </paper-dropdown>
 
   </template>
 
@@ -103,19 +100,6 @@ A proper select input for the Polymer word.
       }
     }
     return index;
-  }
-
-  function getPreviousItem(item) {
-    var prev = null;
-    if (item) {
-      while ((item = item.previousSibling) !== null) {
-        if (item.nodeType === 1 && item.tagName.toLowerCase() === 'select-input-item') {
-          prev = item;
-          break;
-        }
-      }
-    }
-    return prev;
   }
 
   Polymer('select-input', {
@@ -204,6 +188,7 @@ A proper select input for the Polymer word.
      * @type String
      * @default ''
      */
+    inputValue: '',
     get input() {
       return this.$.selectInput.innerText;
     },
@@ -226,6 +211,9 @@ A proper select input for the Polymer word.
      * @param {String} detail select value
      */
 
+    _template: false,
+    _emptyAction: false,
+
     attributeChanged: function(attr, oldValue, newValue) {
       if (this[attr + 'AttributeHandler']) {
         this[attr + 'AttributeHandler'](oldValue, newValue);
@@ -233,6 +221,10 @@ A proper select input for the Polymer word.
     },
 
     ready: function() {
+      // this._template = this.querySelector('template');
+      this._emptyAction = this.querySelector('paper-item') || false;
+      if (this._emptyAction)
+        this._emptyAction.classList.add('empty-action');
       this.disabledAttributeHandler();
       this.placeholderAttributeHandler();
       this.labelFieldAttributeHandler();
@@ -240,11 +232,6 @@ A proper select input for the Polymer word.
       this.nonmatchingAttributeHandler();
       this.multipleAttributeHandler();
       this.commit();
-
-      // var that = this;
-      // this.$.selectInput.addEventListener('blur', function() {
-      //   this.innerText = '';
-      // });
     },
 
     domReady: function() {
@@ -349,13 +336,16 @@ A proper select input for the Polymer word.
 
     dataItemSelected: function(event, detail, sender) {
       if (detail.isSelected) {
-        var value = this.valueFilter(detail.item.children[0].value);
-        if (this.multiple)
-          this.value.push(value);
-        else
-          this.value = value;
-        this.commit();
+        if (!detail.item.classList.contains('empty-action')) {
+          var value = this.valueFilter(detail.item.children[0].value);
+          if (this.multiple)
+            this.value.push(value);
+          else
+            this.value = value;
+          this.commit();
+        }
         this.input = '';
+        this.inputValue = '';
         this.data.length = 0;
         sender.selected = null;
       }
@@ -388,8 +378,8 @@ A proper select input for the Polymer word.
         case 13: // enter
           activeDataItem = this.$.selectDataListMenu.selectedItem;
           topDataItem = this.$.selectDataList.querySelector('select-data-item');
-          if (activeDataItem) {
-            value = this.valueFilter(activeDataItem.children[0].value);
+          if (activeDataItem && !activeDataItem.classList.contains('empty-action')) {
+            value = this.valueFilter(activeDataItem.querySelector('select-data-item').value);
             if (this.multiple)
               this.value.push(value);
             else
@@ -466,6 +456,7 @@ A proper select input for the Polymer word.
           break;
       }
       if (inputChanged === true) {
+        this.inputValue = this.input;
         this.fireInputChangedEvent();
       }
     },

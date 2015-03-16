@@ -19,22 +19,12 @@
   <style>
   html /deep/ body {
     font-size: 16px;
-    font-family: 'Roboto', serif;
+    font-family: 'Roboto', sans-serif;
     font-weight: 300;
   }
   pre {
     font-size: 12px;
   }
-  </style>
-  <link rel="stylesheet" href="/_/elements/common/styles/default.css">
-
-  <script src="../webcomponentsjs/webcomponents.min.js"></script>
-  <link rel="import" href="../core-field/core-field.html">
-  <link rel="import" href="../paper-input/paper-input-decorator.html">
-  <link rel="import" href="../paper-button/paper-button.html">
-  <link rel="import" href="select-input.html">
-
-  <style>
   body {
     background-color: white !important;
     padding: 20px;
@@ -42,78 +32,142 @@
   pre {
     font-size: 14px;
   }
+  section {
+    max-width: 800px;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 200px !important;
+  }
   </style>
+  <link rel="stylesheet" href="/_/elements/common/styles/default.css">
+
+  <script src="../webcomponentsjs/webcomponents.min.js"></script>
+  <link rel="import" href="../paper-input/paper-input-decorator.html">
+  <link rel="import" href="select-input.html">
 
 </head>
 
 <body unresolved>
 
-  <template is="auto-binding">
+  <section>
 
-    <pre>data set: {{data|json}}</pre>
+    <template is="auto-binding">
 
-    <core-field>
-      <label>select input</label>
-      <select-input id="selectInput" nonmatching multiple labelField="name">
-        <paper-button onclick="console.log('hello')" fit>
-          Add
-        </paper-button>
-      </select-input>
-    </core-field>
+      <h2>Data set</h2>
 
-    <!-- <pre>{{$.selectInput.value|json}}</pre> -->
+      <pre>{{data|json}}</pre>
 
-    <pre>[<template repeat="{{item in $.selectInput.value}}">{{item|json}}, </template>]</pre>
+      <h2>simple select input</h2>
 
+      <pre>
+input: {{$.selectInput1.input}}
+inputValue: {{$.selectInput1.inputValue}}
+      </pre>
 
-    <core-field>
-      <!-- <label>text input</label> -->
-      <paper-input-decorator label="text input">
-        <input is="core-input">
-      </paper-input-decorator>
-    </core-field>
-
-    <core-field>
-      <!-- <label>select input</label> -->
-      <paper-input-decorator label="select input" floatingLabel autoValidate required error="Must be valid!">
-        <select-input id="selectInput_" labelField="name" multiple required>
-          <paper-button onclick="console.log('hello')">
-            Add
-          </paper-button>
-        </select-input>
-      </paper-input-decorator>
-    </core-field>
-
-    <!-- <pre>value: {{$.selectInput_.value|json}}</pre> -->
-
-    <pre>value: [<template repeat="{{item in $.selectInput_.value}}">{{item|json}}, </template>]</pre>
-
-
-    <core-field>
-      <label>select-one input</label>
-      <select-input id="selectOneInput" labelField="name">
-        <paper-button onclick="console.log('hello')">
-          Add
-        </paper-button>
-      </select-input>
-    </core-field>
-
-    <pre>value: {{$.selectOneInput.value|json}}</pre>
-
-    <core-field>
-      <label>select-one input</label>
       <paper-input-decorator>
-        <select-input id="selectOneInput_" labelField="name">
-          <paper-button onclick="console.log('hello')">
-            Add
-          </paper-button>
+        <select-input id="selectInput1" nonmatching multiple labelField="name" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
-    </core-field>
 
-    <pre>value: {{$.selectOneInput_.value|json}}</pre>
+      <!-- <pre>{{$.selectInput1.value|json}}</pre> -->
 
-  </template>
+      <pre>[<template repeat="{{item in $.selectInput1.value}}">{{item|json}}, </template>]</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectInput2" nonmatching multiple labelField="name" value="{{ [ data[1], data[2] ] }}" on-input-changed="{{inputChanged}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>[<template repeat="{{item in $.selectInput2.value}}">{{item|json}}, </template>]</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectInput3" nonmatching multiple on-input-changed="{{inputChanged_}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>[<template repeat="{{item in $.selectInput3.value}}">{{item|json}}, </template>]</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectInput4" nonmatching multiple value="{{ [ data[1].name, data[2].name ] }}" on-input-changed="{{inputChanged_}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>[<template repeat="{{item in $.selectInput4.value}}">{{item|json}}, </template>]</pre>
+
+      <h2>simple select-one input</h2>
+
+      <paper-input-decorator>
+        <select-input id="selectOneInput1" labelField="name" on-input-changed="{{inputChanged}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>value: {{$.selectOneInput1.value|json}}</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectOneInput2" value="{{data[2]}}" labelField="name" on-input-changed="{{inputChanged}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>value: {{$.selectOneInput2.value|json}}</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectOneInput3" labelField="name" on-input-changed="{{inputChanged_}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>value: {{$.selectOneInput3.value|json}}</pre>
+
+      <paper-input-decorator>
+        <select-input id="selectOneInput4" value="{{data[2].name}}" labelField="name" on-input-changed="{{inputChanged_}}">
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>value: {{$.selectOneInput4.value|json}}</pre>
+
+      <h2>select input with validation</h2>
+
+      <paper-input-decorator label="select input" floatingLabel autoValidate required error="This field is required">
+        <select-input id="selectInput_" labelField="name" multiple on-input-changed="{{inputChanged}}" required>
+        </select-input>
+      </paper-input-decorator>
+
+      <pre>value: [<template repeat="{{item in $.selectInput_.value}}">{{item|json}}, </template>]</pre>
+
+      <h2>select input with custom not found select action</h2>
+
+      <pre>
+input: {{$.selectInput5.input}}
+inputValue: {{$.selectInput5.inputValue}}
+      </pre>
+
+      <paper-input-decorator label="select input" floatingLabel>
+        <select-input id="selectInput5" labelField="name" multiple on-input-changed="{{inputChanged}}">
+          <paper-item onclick="alert('Element added.')">
+            Add
+          </paper-item>
+        </select-input>
+      </paper-input-decorator>
+
+      <h2>select input with custom select template</h2>
+
+      <pre>
+input: {{$.selectInput6.input}}
+inputValue: {{$.selectInput6.inputValue}}
+      </pre>
+
+      <paper-input-decorator label="select input" floatingLabel>
+        <select-input id="selectInput6" labelField="name" multiple on-input-changed="{{inputChanged}}">
+          <template>
+            <strong>{{item.id}}.</strong> {{item.label}}
+          </template>
+          <paper-item onclick="alert('Element added.')">
+            Add
+          </paper-item>
+        </select-input>
+      </paper-input-decorator>
+
+    </template>
+  </section>
 
   <script>
   'use strict';
@@ -154,51 +208,21 @@
 
     template.data = data;
 
-    var selectInput = document.querySelector('#selectInput');
-
-    selectInput.value = data.slice(0, 2);
-    // selectInput.value = data.slice(0, 2).map(function(e) {
-    //   return e.id;
-    // });
-
-    selectInput.addEventListener('input-changed', function(e) {
+    template.inputChanged = function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
-      selectInput.data = data.filter(function(item) {
+      e.target.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
       });
-      // }).map(function(e){
-      //   return e.name;
-      // });
-    });
+    };
 
-    var selectInput_ = document.querySelector('#selectInput_');
-
-    selectInput_.addEventListener('input-changed', function(e) {
+    template.inputChanged_ = function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
-      selectInput_.data = data.filter(function(item) {
+      e.target.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
+      }).map(function(e) {
+        return e.name;
       });
-    });
-
-    var selectOneInput = document.querySelector('#selectOneInput');
-
-    selectOneInput.value = data[1];
-
-    selectOneInput.addEventListener('input-changed', function(e) {
-      var input = (e.detail.value || '').trim().toLowerCase();
-      selectOneInput.data = data.filter(function(item) {
-        return item.name.toLowerCase().indexOf(input) === 0;
-      });
-    });
-
-    var selectOneInput_ = document.querySelector('#selectOneInput_');
-
-    selectOneInput_.addEventListener('input-changed', function(e) {
-      var input = (e.detail.value || '').trim().toLowerCase();
-      selectOneInput_.data = data.filter(function(item) {
-        return item.name.toLowerCase().indexOf(input) === 0;
-      });
-    });
+    };
 
   });
   </script>

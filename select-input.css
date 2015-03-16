@@ -38,7 +38,7 @@
   height: 8px;
   border-radius: 50%;
   -webkit-transform: translateY(-50%);
-          transform: translateY(-50%);
+  transform: translateY(-50%);
   background-color: #666;
   text-decoration: none;
   cursor: pointer;
@@ -93,7 +93,7 @@ paper-dropdown {
   position: absolute;
   left: 4px;
   right: 4px;
-  margin-top: 4px;
+  margin-top: 8px;
   top: 100%;
   z-index: 1;
 }
@@ -104,4 +104,11 @@ paper-dropdown /deep/ #scroller {
 }
 core-menu {
   margin: 0;
+}
+::content .empty-action {
+/*  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;*/
 }
