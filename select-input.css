@@ -6,6 +6,13 @@
   display: block;
   min-width: 11em;
 }
+:host([multiple]) #selectList {
+  /*height: 36px;*/
+  /*line-height: 36px;*/
+
+  /*margin-top: -1px;*/
+  /*margin-bottom: -1px;*/
+}
 #selectList > select-input-item {
   display: block;
   position: relative;
@@ -26,6 +33,8 @@
   display: inline-block;
   padding-right: 14px;
   margin-right: 4px;
+  height: 32px;
+  line-height: 32px;
   margin-bottom: 1px;
   margin-top: 1px;
 }
@@ -85,8 +94,6 @@
   line-height: 34px;
   min-width: 1em;
   background: transparent;
-}
-#selectInput {
   outline-style: none !important;
 }
 paper-dropdown {
@@ -106,7 +113,7 @@ core-menu {
   margin: 0;
 }
 ::content .empty-action {
-/*  position: absolute;
+  /*  position: absolute;
   top: 0;
   bottom: 0;
   left: 0;

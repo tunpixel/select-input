@@ -65,7 +65,7 @@ inputValue: {{$.selectInput1.inputValue}}
       </pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput1" nonmatching multiple labelField="name" on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput1" multiple labelField="name" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -74,21 +74,21 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>[<template repeat="{{item in $.selectInput1.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput2" nonmatching multiple labelField="name" value="{{ [ data[1], data[2] ] }}" on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput2" multiple nonmatching no-clear-on-blur labelField="name" value="{{ [ data[1], data[2] ] }}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput2.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput3" nonmatching multiple on-input-changed="{{inputChanged_}}">
+        <select-input id="selectInput3" multiple on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput3.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput4" nonmatching multiple value="{{ [ data[1].name, data[2].name ] }}" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectInput4" multiple nonmatching no-clear-on-blur value="{{ [ data[1].name, data[2].name ] }}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -104,7 +104,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput1.value|json}}</pre>
 
       <paper-input-decorator>
-        <select-input id="selectOneInput2" value="{{data[2]}}" labelField="name" on-input-changed="{{inputChanged}}">
+        <select-input id="selectOneInput2" nonmatching no-clear-on-blur labelField="name" value="{{data[2]}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -118,7 +118,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput3.value|json}}</pre>
 
       <paper-input-decorator>
-        <select-input id="selectOneInput4" value="{{data[2].name}}" labelField="name" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectOneInput4" nonmatching no-clear-on-blur labelField="name" value="{{data[2].name}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -127,7 +127,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <h2>select input with validation</h2>
 
       <paper-input-decorator label="select input" floatingLabel autoValidate required error="This field is required">
-        <select-input id="selectInput_" labelField="name" multiple on-input-changed="{{inputChanged}}" required>
+        <select-input id="selectInput_" multiple labelField="name" on-input-changed="{{inputChanged}}" required>
         </select-input>
       </paper-input-decorator>
 
@@ -156,7 +156,7 @@ inputValue: {{$.selectInput6.inputValue}}
       </pre>
 
       <paper-input-decorator label="select input" floatingLabel>
-        <select-input id="selectInput6" labelField="name" multiple on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput6" labelField="name" multiple nonmatching no-clear-on-blur on-input-changed="{{inputChanged}}">
           <template>
             <strong>{{item.id}}.</strong> {{item.label}}
           </template>
