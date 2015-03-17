@@ -277,8 +277,6 @@ A proper select input for the Polymer word.
 
     multipleAttributeHandler: function(oldValue, newValue) {
       this.multiple = this.hasAttribute('multiple');
-      if (!this.multiple)
-        this.nonmatching = false;
     },
 
     /**
@@ -331,13 +329,13 @@ A proper select input for the Polymer word.
         return this.valueFilter(obj);
       if (this.labelField === null)
         return obj || '';
-      return typeof obj == 'object' ? obj[this.labelField] : obj || '';
+      return typeof obj == 'object' && obj ? obj[this.labelField] : obj || '';
     },
 
     valueFilter: function(obj) {
       if (this.valueField === null)
         return obj || '';
-      return typeof obj == 'object' ? obj[this.valueField] : obj || '';
+      return typeof obj == 'object' && obj ? obj[this.valueField] : obj || '';
     },
 
     elementTapped: function(event, detail, sender) {
@@ -354,10 +352,10 @@ A proper select input for the Polymer word.
           else
             this.value = value;
           this.commit();
-          if (!this.noClearOnBlur) {
+          // if (!this.noClearOnBlur) {
             this.clear();
             this._focus();
-          }
+          // }
         }
         this.data.length = 0;
         sender.selected = null;
@@ -369,8 +367,10 @@ A proper select input for the Polymer word.
         var value = sender.parentElement.value;
         var index = this.value.indexOf(value);
         this.value.splice(index, 1);
-      } else
+      } else {
         this.value = null;
+        this.clear();
+      }
       this.commit();
       this._focus();
     },

@@ -61,7 +61,7 @@
   pointer-events: none;
 }
 #selectList > select-input-item > a:hover {
-  background-color: #F44336;
+  background-color: #d34336;
 }
 #selectList > * {
   width: auto;

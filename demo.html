@@ -74,7 +74,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>[<template repeat="{{item in $.selectInput1.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput2" multiple nonmatching no-clear-on-blur labelField="name" value="{{ [ data[1], data[2] ] }}" on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput2" multiple nonmatching no-clear-on-blur labelField="name" value="{{selected}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -88,7 +88,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>[<template repeat="{{item in $.selectInput3.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator>
-        <select-input id="selectInput4" multiple nonmatching no-clear-on-blur value="{{ [ data[1].name, data[2].name ] }}" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectInput4" multiple nonmatching no-clear-on-blur value="{{selectedName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -104,7 +104,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput1.value|json}}</pre>
 
       <paper-input-decorator>
-        <select-input id="selectOneInput2" nonmatching no-clear-on-blur labelField="name" value="{{data[2]}}" on-input-changed="{{inputChanged}}">
+        <select-input id="selectOneInput2" nonmatching no-clear-on-blur labelField="name" value="{{selectedOne}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -118,7 +118,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput3.value|json}}</pre>
 
       <paper-input-decorator>
-        <select-input id="selectOneInput4" nonmatching no-clear-on-blur labelField="name" value="{{data[2].name}}" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectOneInput4" nonmatching no-clear-on-blur labelField="name" value="{{selectedOneName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -206,7 +206,17 @@ inputValue: {{$.selectInput6.inputValue}}
 
     var template = document.querySelector('template');
 
-    template.data = data;
+    template.data = data
+
+    template.selected = data.slice(1,3);
+
+    template.selectedOne = data[0];
+
+    template.selectedName = template.selected.map(function(item){
+      return item.name;
+    });
+
+    template.selectedOneName = template.selectedOne.name;
 
     template.inputChanged = function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
