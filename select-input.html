@@ -13,6 +13,18 @@ A proper select input for the Polymer word.
       </paper-item>
     </select-input>
 
+    <paper-input-decorator label="select input" floatingLabel>
+      <select-input id="selectInput6" labelField="name" multiple nonmatching selectOnBlur on-input-changed="{{inputChanged}}">
+        <template>
+          <strong>{{item.id}}.</strong> {{item.name}}
+        </template>
+        <paper-item onclick="alert('Element added.')">
+          Add
+        </paper-item>
+        <paper-progress indeterminate></paper-progress>
+      </select-input>
+    </paper-input-decorator>
+
 @element select-input
 @blurb A proper select input for the Polymer word.
 @status alpha
@@ -41,51 +53,59 @@ A proper select input for the Polymer word.
   </template>
 </polymer-element>
 
-<polymer-element name="select-input" attributes="value data" tabindex="0" on-focus="{{_focus}}" on-blur="{{clearInputOnBlur}}">
+<polymer-element name="select-input" attributes="value data" tabindex="0" on-focus="{{_focus}}" on-blur="{{_blur}}">
 
   <template>
-    <link rel="stylesheet" href="select-input.css">
+    <link rel="stylesheet" href="select-input.css" shim-shadowdom>
 
     <div id="selectList" on-tap="{{elementTapped}}" i-on-enter="{{elementTapped}}">
 
       <template if="{{multiple}}">
         <template repeat="{{item in value}}">
-          <select-input-item value="{{item}}">{{item|labelFilter}}
-            <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}" tabindex="0"></a>
+          <select-input-item value="{{item}}">
+            <template ref="itemTemplate" bind></template>
+            <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
           </select-input-item>
         </template>
       </template>
 
-      <template if="{{!multiple}}">
-        <template if="{{value}}">
-          <select-input-item value="{{value}}">{{value|labelFilter}}
-            <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}" tabindex="0"></a>
-          </select-input-item>
-        </template>
+      <template if="{{!multiple && value}}">
+        <select-input-item value="{{value}}">
+          <template ref="itemTemplate" bind="{{value as item}}"></template>
+          <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
+        </select-input-item>
       </template>
+
+      <input id="placeholder" hidden?="{{value.length || $.selectInput.innerText.length}}" placeholder="{{placeholder}}" tabindex="-1">
 
       <div id="placeholder-container" hidden?="{{!multiple && value}}">
-        <input id="placeholder" hidden?="{{value.length || $.selectInput.innerText.length}}" placeholder="{{placeholder}}" tabindex="-1">
         <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}">
         </div>
       </div>
 
+      <a id="clearButton" hidden?="{{!inputValue}}" on-tap="{{clear}}" i-on-enter="{{clear}}"></a>
+
     </div>
+
+    <content select="paper-progress"></content>
 
     <paper-dropdown id="selectDataList" opened?="{{(_emptyAction || data.length) && !!inputValue && !_dataItemTapped}}" transition="">
       <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
         <template repeat="{{item in data}}">
           <paper-item>
             <select-data-item value="{{item}}"></select-data-item>
-            <template if="{{!_template}}">{{item|labelFilter}}</template>
-            <template class="itemTemplate" if="{{_template}}" bind="{{_template}}"></template>
+            <template ref="itemTemplate" bind></template>
           </paper-item>
         </template>
         <template if="{{_emptyAction && !data.length}}">
-          <content select="paper-item" class="empty-action" i-hidden?="{{data.length}}"></content>
+          <content select="paper-item"></content>
         </template>
       </core-menu>
     </paper-dropdown>
+
+    <template id="itemTemplate">
+      {{item|labelFilter}}
+    </template>
 
   </template>
 
@@ -115,15 +135,25 @@ A proper select input for the Polymer word.
     },
 
     /**
-     * `input` input
+     * `inputValue` inputValue
      *
      * Default is ...
      *
-     * @property input
+     * @attribute inputValue
      * @type String
      * @default ''
      */
     inputValue: '',
+
+    /**
+     * `input` input
+     *
+     * Default is ...
+     *
+     * @attribute input
+     * @type String
+     * @default ''
+     */
     get input() {
       return this.$.selectInput.innerText;
     },
@@ -158,7 +188,15 @@ A proper select input for the Polymer word.
     },
 
     ready: function() {
-      // this._template = this.querySelector('template');
+
+      this._template = this.querySelector('template');
+      if (this._template) {
+        var t = document.createElement('template');
+        t.id = 'itemTemplate';
+        t.innerHTML = this._template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.itemTemplate);
+      }
+
       this._emptyAction = this.querySelector('paper-item') || false;
       if (this._emptyAction)
         this._emptyAction.classList.add('empty-action');
@@ -169,6 +207,7 @@ A proper select input for the Polymer word.
       this.nonmatchingAttributeHandler();
       this.multipleAttributeHandler();
       this.noClearOnBlurAttributeHandler();
+      this.selectOnBlurAttributeHandler();
       this.commit();
     },
 
@@ -180,12 +219,27 @@ A proper select input for the Polymer word.
       this.value = this.value || (this.multiple ? [] : null);
     },
 
+    selectItem: function(value) {
+      var _value = this.valueFilter(value);
+      if (this.multiple)
+        this.value.push(_value);
+      else
+        this.value = _value;
+      this.commit();
+      this.clear();
+      this.data.length = 0;
+    },
+
     _focus: function() {
       this.$.selectInput.focus();
     },
 
     _blur: function() {
-      this.$.selectInput.blur();
+      if (this.nonmatching && this.selectOnBlur && this.input)
+        this.selectItem(this.input);
+      else if (!this.noClearOnBlur)
+        this.clear();
+      //  this.$.selectInput.blur();
     },
 
     reset: function() {
@@ -199,10 +253,6 @@ A proper select input for the Polymer word.
       this.inputValue = '';
     },
 
-    clearInputOnBlur: function() {
-      if (!this.noClearOnBlur)
-        this.clear();
-    },
 
     /**
      * `disabled` disabled
@@ -306,7 +356,25 @@ A proper select input for the Polymer word.
     noClearOnBlur: false,
 
     noClearOnBlurAttributeHandler: function(oldValue, newValue) {
-      this.noClearOnBlur = this.hasAttribute('no-clear-on-blur');
+      this.noClearOnBlur = this.hasAttribute('noClearOnBlur');
+    },
+
+    /**
+     * `selectOnBlur` selectOnBlur
+     *
+     * Valid when `nonmatching` is `true`
+     *
+     * Default is `false`
+     *
+     * @property selectOnBlur
+     * @type Boolean
+     * @default false
+     */
+    selectOnBlur: false,
+
+    selectOnBlurAttributeHandler: function(oldValue, newValue) {
+      if (!this.nonmatching)
+        this.selectOnBlur = this.hasAttribute('selectOnBlur');
     },
 
     /**
@@ -345,18 +413,8 @@ A proper select input for the Polymer word.
     dataItemSelected: function(event, detail, sender) {
       if (detail.isSelected) {
         this._dataItemTapped = true;
-        if (!detail.item.classList.contains('empty-action')) {
-          var value = this.valueFilter(detail.item.children[0].value);
-          if (this.multiple)
-            this.value.push(value);
-          else
-            this.value = value;
-          this.commit();
-          // if (!this.noClearOnBlur) {
-            this.clear();
-            this._focus();
-          // }
-        }
+        if (!detail.item.classList.contains('empty-action'))
+          this.selectItem(detail.item.children[0].value);
         this.data.length = 0;
         sender.selected = null;
       }
@@ -394,34 +452,13 @@ A proper select input for the Polymer word.
           activeDataItem = this.$.selectDataListMenu.selectedItem;
           topDataItem = this.$.selectDataList.querySelector('select-data-item');
           if (activeDataItem && !activeDataItem.classList.contains('empty-action')) {
-            value = this.valueFilter(activeDataItem.querySelector('select-data-item').value);
-            if (this.multiple)
-              this.value.push(value);
-            else
-              this.value = value;
-            this.commit();
-            this.clear();
-            this.data.length = 0;
+            this.selectItem(activeDataItem.querySelector('select-data-item').value);
           } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
-            value = this.valueFilter(topDataItem.value);
-            if (this.multiple)
-              this.value.push(value);
-            else
-              this.value = value;
-            this.commit();
-            this.clear();
-            this.data.length = 0;
+            this.selectItem(topDataItem.value);
           } else if (this.nonmatching && this.input.length > 0) {
             value = {};
             value[this.labelField] = this.input;
-            value = this.valueFilter(value);
-            if (this.multiple)
-              this.value.push(value);
-            else
-              this.value = value;
-            this.commit();
-            this.clear();
-            this.data.length = 0;
+            this.selectItem(value);
           }
           inputChanged = false;
           event.preventDefault();

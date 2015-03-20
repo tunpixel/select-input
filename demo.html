@@ -16,7 +16,7 @@
 
 
   <link href='http://fonts.googleapis.com/css?family=Roboto:400,300,100,500' rel='stylesheet' type='text/css'>
-  <style>
+  <style shim-shadowdom>
   html /deep/ body {
     font-size: 16px;
     font-family: 'Roboto', sans-serif;
@@ -42,7 +42,12 @@
   <link rel="stylesheet" href="/_/elements/common/styles/default.css">
 
   <script src="../webcomponentsjs/webcomponents.min.js"></script>
+
+  <link rel="import" href="../polymer/polymer.html">
+
   <link rel="import" href="../paper-input/paper-input-decorator.html">
+  <link rel="import" href="../paper-progress/paper-progress.html">
+
   <link rel="import" href="select-input.html">
 
 </head>
@@ -64,7 +69,7 @@ input: {{$.selectInput1.input}}
 inputValue: {{$.selectInput1.inputValue}}
       </pre>
 
-      <paper-input-decorator>
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectInput1" multiple labelField="name" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
@@ -73,22 +78,22 @@ inputValue: {{$.selectInput1.inputValue}}
 
       <pre>[<template repeat="{{item in $.selectInput1.value}}">{{item|json}}, </template>]</pre>
 
-      <paper-input-decorator>
-        <select-input id="selectInput2" multiple nonmatching no-clear-on-blur labelField="name" value="{{selected}}" on-input-changed="{{inputChanged}}">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+        <select-input id="selectInput2" multiple nonmatching selectOnBlur labelField="name" value="{{selected}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput2.value}}">{{item|json}}, </template>]</pre>
 
-      <paper-input-decorator>
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectInput3" multiple on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput3.value}}">{{item|json}}, </template>]</pre>
 
-      <paper-input-decorator>
-        <select-input id="selectInput4" multiple nonmatching no-clear-on-blur value="{{selectedName}}" on-input-changed="{{inputChanged_}}">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+        <select-input id="selectInput4" multiple nonmatching selectOnBlur value="{{selectedName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -96,29 +101,29 @@ inputValue: {{$.selectInput1.inputValue}}
 
       <h2>simple select-one input</h2>
 
-      <paper-input-decorator>
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectOneInput1" labelField="name" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>value: {{$.selectOneInput1.value|json}}</pre>
 
-      <paper-input-decorator>
-        <select-input id="selectOneInput2" nonmatching no-clear-on-blur labelField="name" value="{{selectedOne}}" on-input-changed="{{inputChanged}}">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+        <select-input id="selectOneInput2" nonmatching selectOnBlur labelField="name" value="{{selectedOne}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>value: {{$.selectOneInput2.value|json}}</pre>
 
-      <paper-input-decorator>
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectOneInput3" labelField="name" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>value: {{$.selectOneInput3.value|json}}</pre>
 
-      <paper-input-decorator>
-        <select-input id="selectOneInput4" nonmatching no-clear-on-blur labelField="name" value="{{selectedOneName}}" on-input-changed="{{inputChanged_}}">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+        <select-input id="selectOneInput4" nonmatching selectOnBlur labelField="name" value="{{selectedOneName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -126,7 +131,7 @@ inputValue: {{$.selectInput1.inputValue}}
 
       <h2>select input with validation</h2>
 
-      <paper-input-decorator label="select input" floatingLabel autoValidate required error="This field is required">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel autoValidate required error="This field is required">
         <select-input id="selectInput_" multiple labelField="name" on-input-changed="{{inputChanged}}" required>
         </select-input>
       </paper-input-decorator>
@@ -140,7 +145,7 @@ input: {{$.selectInput5.input}}
 inputValue: {{$.selectInput5.inputValue}}
       </pre>
 
-      <paper-input-decorator label="select input" floatingLabel>
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectInput5" labelField="name" multiple on-input-changed="{{inputChanged}}">
           <paper-item onclick="alert('Element added.')">
             Add
@@ -155,26 +160,32 @@ input: {{$.selectInput6.input}}
 inputValue: {{$.selectInput6.inputValue}}
       </pre>
 
-      <paper-input-decorator label="select input" floatingLabel>
-        <select-input id="selectInput6" labelField="name" multiple nonmatching no-clear-on-blur on-input-changed="{{inputChanged}}">
+      <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+        <select-input id="selectInput6" labelField="name" multiple nonmatching selectOnBlur on-input-changed="{{inputChanged}}">
           <template>
-            <strong>{{item.id}}.</strong> {{item.label}}
+            <strong>{{item.id}}.</strong> {{item.name}}
           </template>
           <paper-item onclick="alert('Element added.')">
             Add
           </paper-item>
+          <paper-progress indeterminate></paper-progress>
         </select-input>
       </paper-input-decorator>
 
     </template>
+
   </section>
 
   <script>
   'use strict';
 
-  PolymerExpressions.prototype.json = function(data) {
-    return JSON.stringify(data, null, 2);
-  };
+  addEventListener('polymer-ready', function() {
+
+    PolymerExpressions.prototype.json = function(data) {
+      return JSON.stringify(data, null, 2);
+    };
+
+  });
 
   var data = [{
     id: 1,
@@ -206,13 +217,17 @@ inputValue: {{$.selectInput6.inputValue}}
 
     var template = document.querySelector('template');
 
+    // template.json = function(data) {
+    //   return JSON.stringify(data, null, 2);
+    // };
+
     template.data = data
 
-    template.selected = data.slice(1,3);
+    template.selected = data.slice(1, 3);
 
     template.selectedOne = data[0];
 
-    template.selectedName = template.selected.map(function(item){
+    template.selectedName = template.selected.map(function(item) {
       return item.name;
     });
 
