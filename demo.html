@@ -64,13 +64,10 @@
 
       <h2>simple select input</h2>
 
-      <pre>
-input: {{$.selectInput1.input}}
-inputValue: {{$.selectInput1.inputValue}}
-      </pre>
+      <pre>input: {{$.selectInput1.input}}</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectInput1" multiple labelField="name" on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput1" multiple unique labelField="name" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -79,21 +76,21 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>[<template repeat="{{item in $.selectInput1.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectInput2" multiple nonmatching selectOnBlur labelField="name" value="{{selected}}" on-input-changed="{{inputChanged}}">
+        <select-input id="selectInput2" multiple unique nonmatching selectInputOnBlur labelField="name" value="{{selected}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput2.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectInput3" multiple on-input-changed="{{inputChanged_}}">
+        <select-input id="selectInput3" multiple unique on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
       <pre>[<template repeat="{{item in $.selectInput3.value}}">{{item|json}}, </template>]</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectInput4" multiple nonmatching selectOnBlur value="{{selectedName}}" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectInput4" multiple unique nonmatching selectInputOnBlur value="{{selectedName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -109,7 +106,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput1.value|json}}</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectOneInput2" nonmatching selectOnBlur labelField="name" value="{{selectedOne}}" on-input-changed="{{inputChanged}}">
+        <select-input id="selectOneInput2" nonmatching selectInputOnBlur labelField="name" value="{{selectedOne}}" on-input-changed="{{inputChanged}}">
         </select-input>
       </paper-input-decorator>
 
@@ -123,7 +120,7 @@ inputValue: {{$.selectInput1.inputValue}}
       <pre>value: {{$.selectOneInput3.value|json}}</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectOneInput4" nonmatching selectOnBlur labelField="name" value="{{selectedOneName}}" on-input-changed="{{inputChanged_}}">
+        <select-input id="selectOneInput4" nonmatching selectInputOnBlur labelField="name" value="{{selectedOneName}}" on-input-changed="{{inputChanged_}}">
         </select-input>
       </paper-input-decorator>
 
@@ -140,34 +137,28 @@ inputValue: {{$.selectInput1.inputValue}}
 
       <h2>select input with custom not found select action</h2>
 
-      <pre>
-input: {{$.selectInput5.input}}
-inputValue: {{$.selectInput5.inputValue}}
-      </pre>
+      <pre>input: {{$.selectInput5.input}}</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
         <select-input id="selectInput5" labelField="name" multiple on-input-changed="{{inputChanged}}">
           <paper-item onclick="alert('Element added.')">
-            Add
+            Add <strong style="margin-left: 5px;"> {{$.selectInput5.input}}</strong>
           </paper-item>
         </select-input>
       </paper-input-decorator>
 
       <h2>select input with custom select template</h2>
 
-      <pre>
-input: {{$.selectInput6.input}}
-inputValue: {{$.selectInput6.inputValue}}
-      </pre>
+      <pre>input: {{$.selectInput6.input}}</pre>
 
       <paper-input-decorator label="Select your favorite programming language" floatingLabel>
-        <select-input id="selectInput6" labelField="name" multiple nonmatching selectOnBlur on-input-changed="{{inputChanged}}">
-          <template>
-            <strong>{{item.id}}.</strong> {{item.name}}
+        <select-input id="selectInput6" labelField="name" multiple nonmatching selectInputOnBlur on-input-changed="{{inputChanged}}">
+          <template select-item>
+            <strong>{{item.name}}</strong>
           </template>
-          <paper-item onclick="alert('Element added.')">
-            Add
-          </paper-item>
+          <template data-item>
+            <strong style="margin-right: 5px;">{{item.id}}.</strong> {{item.name}}
+          </template>
           <paper-progress indeterminate></paper-progress>
         </select-input>
       </paper-input-decorator>
@@ -178,14 +169,6 @@ inputValue: {{$.selectInput6.inputValue}}
 
   <script>
   'use strict';
-
-  addEventListener('polymer-ready', function() {
-
-    PolymerExpressions.prototype.json = function(data) {
-      return JSON.stringify(data, null, 2);
-    };
-
-  });
 
   var data = [{
     id: 1,
@@ -213,15 +196,20 @@ inputValue: {{$.selectInput6.inputValue}}
     name: "Java"
   }];
 
+
+  addEventListener('polymer-ready', function() {
+
+    PolymerExpressions.prototype.json = function(data) {
+      return JSON.stringify(data, null, 2);
+    };
+
+  });
+
   addEventListener('template-bound', function() {
 
     var template = document.querySelector('template');
 
-    // template.json = function(data) {
-    //   return JSON.stringify(data, null, 2);
-    // };
-
-    template.data = data
+    template.data = data;
 
     template.selected = data.slice(1, 3);
 

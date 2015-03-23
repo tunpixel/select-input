@@ -30,6 +30,8 @@
   background-color: #E7E7E7;
   color: #757575;
   cursor: default;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 :host([multiple]) #selectList > select-input-item {
   display: inline-block;
@@ -65,12 +67,6 @@
 #selectList > * {
   width: auto;
 }
-#placeholder-container {
-  display: inline-block;
-  position: relative;
-  background: transparent;
-  z-index: 0;
-}
 #placeholder {
   position: absolute;
   left: 0;
@@ -79,12 +75,17 @@
   top: 0;
   bottom: 0;
   padding: 0;
-  z-index: -1;
   font: inherit;
   color: inherit;
   background-color: transparent;
   border: none;
   outline: none;
+}
+#input-container {
+  display: inline-block;
+  position: relative;
+  background: transparent;
+  z-index: 0;
 }
 #selectInput {
   position: relative;

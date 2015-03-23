@@ -7,22 +7,19 @@ A proper select input for the Polymer word.
 
 ##### Example
 
-    <select-input labelField="name" multiple on-input-changed="{{inputChanged}}">
-      <paper-item onclick="alert('Element added.')">
-        Add
-      </paper-item>
-    </select-input>
-
-    <paper-input-decorator label="select input" floatingLabel>
-      <select-input id="selectInput6" labelField="name" multiple nonmatching selectOnBlur on-input-changed="{{inputChanged}}">
-        <template>
-          <strong>{{item.id}}.</strong> {{item.name}}
+    <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+      <select-input id="selectInput6" labelField="name" multiple nonmatching selectInputOnBlur on-input-changed="{{inputChanged}}">
+        <template select-item>
+          <strong>{{item.name}}</strong>
         </template>
-        <paper-item onclick="alert('Element added.')">
-          Add
-        </paper-item>
+        <template data-item>
+          <strong style="margin-right: 5px;">{{item.id}}.</strong> {{item.name}}
+        </template>
         <paper-progress indeterminate></paper-progress>
       </select-input>
+      <paper-item onclick="alert('Element added.')">
+         Add <strong style="margin-left: 5px;"> {{$.selectInput6.input}}</strong>
+      </paper-item>
     </paper-input-decorator>
 
 @element select-input
@@ -31,7 +28,7 @@ A proper select input for the Polymer word.
 @homepage http://tunpixel.github.io/select-input
 -->
 
-<polymer-element name="select-input-item" attributes="value inputValue data" noscript>
+<polymer-element name="select-input-item" attributes="value input data" noscript>
   <template>
     <style>
     :host {
@@ -63,7 +60,7 @@ A proper select input for the Polymer word.
       <template if="{{multiple}}">
         <template repeat="{{item in value}}">
           <select-input-item value="{{item}}">
-            <template ref="itemTemplate" bind></template>
+            <template ref="selectedItemTemplate" bind></template>
             <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
           </select-input-item>
         </template>
@@ -71,25 +68,25 @@ A proper select input for the Polymer word.
 
       <template if="{{!multiple && value}}">
         <select-input-item value="{{value}}">
-          <template ref="itemTemplate" bind="{{value as item}}"></template>
+          <template ref="selectedItemTemplate" bind="{{value as item}}"></template>
           <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
         </select-input-item>
       </template>
 
-      <input id="placeholder" hidden?="{{value.length || $.selectInput.innerText.length}}" placeholder="{{placeholder}}" tabindex="-1">
+      <input id="placeholder" hidden?="{{value.length || input || !placeholder}}" placeholder="{{placeholder}}" tabindex="-1">
 
-      <div id="placeholder-container" hidden?="{{!multiple && value}}">
+      <div id="input-container" hidden?="{{!multiple && value}}">
         <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}">
         </div>
       </div>
 
-      <a id="clearButton" hidden?="{{!inputValue}}" on-tap="{{clear}}" i-on-enter="{{clear}}"></a>
+      <a id="clearButton" hidden?="{{!input}}" on-tap="{{clear}}" i-on-enter="{{clear}}"></a>
 
     </div>
 
     <content select="paper-progress"></content>
 
-    <paper-dropdown id="selectDataList" opened?="{{(_emptyAction || data.length) && !!inputValue && !_dataItemTapped}}" transition="">
+    <paper-dropdown id="selectDataList" opened?="{{(_emptyAction || data.length) && !!input && !_dataItemTapped}}" transition="">
       <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
         <template repeat="{{item in data}}">
           <paper-item>
@@ -103,8 +100,12 @@ A proper select input for the Polymer word.
       </core-menu>
     </paper-dropdown>
 
-    <template id="itemTemplate">
+    <template id="selectedItemTemplate">
       {{item|labelFilter}}
+    </template>
+
+    <template id="itemTemplate">
+      <strong>{{item|labelFilter|highlight}}</strong>{{item|labelFilter|highlightAfter}}
     </template>
 
   </template>
@@ -115,12 +116,20 @@ A proper select input for the Polymer word.
   Polymer('select-input', {
 
     /**
+     * selected item(s)
+     *
+     * @attribute value
+     * @type String
+     * @default null
+     */
+
+    /**
      * The "committed" value of the input, ie. the input value when the user
      * hits the "enter" key or blurs the input after changing the value. You
      * can bind to this value instead of listening for the "change" event.
      * Setting this property has no effect on the input value.
      *
-     * @attribute committedValue
+     * @property committedValue
      * @type string
      * @default null
      */
@@ -135,17 +144,6 @@ A proper select input for the Polymer word.
     },
 
     /**
-     * `inputValue` inputValue
-     *
-     * Default is ...
-     *
-     * @attribute inputValue
-     * @type String
-     * @default ''
-     */
-    inputValue: '',
-
-    /**
      * `input` input
      *
      * Default is ...
@@ -154,13 +152,35 @@ A proper select input for the Polymer word.
      * @type String
      * @default ''
      */
-    get input() {
-      return this.$.selectInput.innerText;
+
+    input: '',
+
+    inputChanged: function(oldValue, newValue) {
+      if (this.$ && this.$.selectInput)
+        this.$.selectInput.innerText = newValue;
+      // console.log('inputChanged', oldValue, newValue);
     },
 
-    set input(value) {
-      this.$.selectInput.innerText = value;
+    // set input(value) {
+    //   if (this.$ && this.$.selectInput)
+    //     this.$.selectInput.innerText = value;
+    //   this.input = value;
+    // },
+
+    inputHandler: function(event, detail, selectInput) {
+      event.stopPropagation();
+      this.input = selectInput.innerText.trim();
+      // this.fireInputChangedEvent();
+      // console.log('input changed', this.input, arguments);
     },
+
+    /**
+     * suggested select items
+     *
+     * @attribute data
+     * @type String
+     * @default null
+     */
 
     /**
      * The `input-changed` event is fired when text input is changed
@@ -176,7 +196,6 @@ A proper select input for the Polymer word.
      * @param {String} detail select value
      */
 
-    _template: false,
     _emptyAction: false,
 
     _dataItemTapped: false,
@@ -189,11 +208,21 @@ A proper select input for the Polymer word.
 
     ready: function() {
 
-      this._template = this.querySelector('template');
-      if (this._template) {
+      var _template;
+
+      _template = this.querySelector('template[select-item]');
+      if (_template) {
+        var t = document.createElement('template');
+        t.id = 'selectedItemTemplate';
+        t.innerHTML = _template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.selectedItemTemplate);
+      }
+
+      _template = this.querySelector('template[data-item]');
+      if (_template) {
         var t = document.createElement('template');
         t.id = 'itemTemplate';
-        t.innerHTML = this._template.ref_.innerHTML;
+        t.innerHTML = _template.ref_.innerHTML;
         this.shadowRoot.replaceChild(t, this.$.itemTemplate);
       }
 
@@ -206,8 +235,9 @@ A proper select input for the Polymer word.
       this.valueFieldAttributeHandler();
       this.nonmatchingAttributeHandler();
       this.multipleAttributeHandler();
-      this.noClearOnBlurAttributeHandler();
-      this.selectOnBlurAttributeHandler();
+      this.uniqueAttributeHandler();
+      this.keepInputOnBlurAttributeHandler();
+      this.selectInputOnBlurAttributeHandler();
       this.commit();
     },
 
@@ -217,17 +247,36 @@ A proper select input for the Polymer word.
       }
       this.data = this.data || [];
       this.value = this.value || (this.multiple ? [] : null);
+      this.input = '';
     },
 
     selectItem: function(value) {
       var _value = this.valueFilter(value);
-      if (this.multiple)
-        this.value.push(_value);
-      else
+      if (this.multiple) {
+        if (!this.unique || this.value.indexOf(_value) === -1)
+          this.value.push(_value);
+      } else
         this.value = _value;
       this.commit();
       this.clear();
       this.data.length = 0;
+    },
+
+
+    refresh: function(selector, root) {
+      if (!root)
+        root = this.shadowRoot;
+      if (!selector)
+        selector = 'template';
+      Array.prototype.forEach.call(root.querySelectorAll(selector), function(t) {
+        try {
+          t.iterator_.updateIteratedValue();
+        } catch (e) {}
+      });
+    },
+
+    dataChanged: function() {
+      this.refresh('template[repeat]', this.$.selectDataList);
     },
 
     _focus: function() {
@@ -235,9 +284,9 @@ A proper select input for the Polymer word.
     },
 
     _blur: function() {
-      if (this.nonmatching && this.selectOnBlur && this.input)
+      if (this.nonmatching && this.selectInputOnBlur && this.input)
         this.selectItem(this.input);
-      else if (!this.noClearOnBlur)
+      else if (!this.keepInputOnBlur)
         this.clear();
       //  this.$.selectInput.blur();
     },
@@ -250,7 +299,6 @@ A proper select input for the Polymer word.
 
     clear: function() {
       this.input = '';
-      this.inputValue = '';
     },
 
 
@@ -330,6 +378,21 @@ A proper select input for the Polymer word.
     },
 
     /**
+     * `unique` unique
+     *
+     * Default is false
+     *
+     * @property unique
+     * @type Boolean
+     * @default false
+     */
+    unique: false,
+
+    uniqueAttributeHandler: function(oldValue, newValue) {
+      this.unique = this.multiple ? this.hasAttribute('unique') : true;
+    },
+
+    /**
      * `nonmatching` nonmatching
      *
      * Default is ...
@@ -345,36 +408,36 @@ A proper select input for the Polymer word.
     },
 
     /**
-     * `noClearOnBlur` noClearOnBlur
+     * `keepInputOnBlur` keepInputOnBlur
      *
      * Default is ...
      *
-     * @property noClearOnBlur
+     * @property keepInputOnBlur
      * @type Boolean
      * @default false
      */
-    noClearOnBlur: false,
+    keepInputOnBlur: false,
 
-    noClearOnBlurAttributeHandler: function(oldValue, newValue) {
-      this.noClearOnBlur = this.hasAttribute('noClearOnBlur');
+    keepInputOnBlurAttributeHandler: function(oldValue, newValue) {
+      this.keepInputOnBlur = this.hasAttribute('keepInputOnBlur');
     },
 
     /**
-     * `selectOnBlur` selectOnBlur
+     * `selectInputOnBlur` selectInputOnBlur
      *
      * Valid when `nonmatching` is `true`
      *
      * Default is `false`
      *
-     * @property selectOnBlur
+     * @property selectInputOnBlur
      * @type Boolean
      * @default false
      */
-    selectOnBlur: false,
+    selectInputOnBlur: false,
 
-    selectOnBlurAttributeHandler: function(oldValue, newValue) {
+    selectInputOnBlurAttributeHandler: function(oldValue, newValue) {
       if (!this.nonmatching)
-        this.selectOnBlur = this.hasAttribute('selectOnBlur');
+        this.selectInputOnBlur = this.hasAttribute('selectInputOnBlur');
     },
 
     /**
@@ -397,13 +460,21 @@ A proper select input for the Polymer word.
         return this.valueFilter(obj);
       if (this.labelField === null)
         return obj || '';
-      return typeof obj == 'object' && obj ? obj[this.labelField] : obj || '';
+      return typeof obj === 'object' && obj ? obj[this.labelField] : obj || '';
     },
 
     valueFilter: function(obj) {
       if (this.valueField === null)
         return obj || '';
-      return typeof obj == 'object' && obj ? obj[this.valueField] : obj || '';
+      return typeof obj === 'object' && obj ? obj[this.valueField] : obj || '';
+    },
+
+    highlight: function(text) {
+      return text.substr(0, this.input.length);
+    },
+
+    highlightAfter: function(text) {
+      return text.substr(this.input.length);
     },
 
     elementTapped: function(event, detail, sender) {
@@ -512,22 +583,16 @@ A proper select input for the Polymer word.
           break;
       }
       if (inputChanged === true) {
-        this.inputValue = this.input;
         this._dataItemTapped = false;
         this.fireInputChangedEvent();
       }
-    },
-
-    inputHandler: function(e) {
-      e.stopPropagation();
-      // this.fireInputChangedEvent();
     },
 
     fireInputChangedEvent: function() {
       this.fire('input-changed', {
         value: this.input
       });
-    },
+    }
 
   });
   </script>
