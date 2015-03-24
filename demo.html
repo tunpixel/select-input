@@ -223,13 +223,16 @@
 
     template.inputChanged = function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
+      if (input)
       e.target.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
       });
+      console.log('input-changed', e.detail.value, e.target.data);
     };
 
     template.inputChanged_ = function(e) {
       var input = (e.detail.value || '').trim().toLowerCase();
+      if (input)
       e.target.data = data.filter(function(item) {
         return item.name.toLowerCase().indexOf(input) === 0;
       }).map(function(e) {

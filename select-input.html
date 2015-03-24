@@ -28,7 +28,7 @@ A proper select input for the Polymer word.
 @homepage http://tunpixel.github.io/select-input
 -->
 
-<polymer-element name="select-input-item" attributes="value input data" noscript>
+<polymer-element name="select-input-item" attributes="value" noscript>
   <template>
     <style>
     :host {
@@ -50,7 +50,7 @@ A proper select input for the Polymer word.
   </template>
 </polymer-element>
 
-<polymer-element name="select-input" attributes="value data" tabindex="0" on-focus="{{_focus}}" on-blur="{{_blur}}">
+<polymer-element name="select-input" attributes="value data input" i-tabindex="0" on-focus="{{_focus}}" on-blur="{{_blur}}">
 
   <template>
     <link rel="stylesheet" href="select-input.css" shim-shadowdom>
@@ -76,7 +76,7 @@ A proper select input for the Polymer word.
       <input id="placeholder" hidden?="{{value.length || input || !placeholder}}" placeholder="{{placeholder}}" tabindex="-1">
 
       <div id="input-container" hidden?="{{!multiple && value}}">
-        <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}">
+        <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}" on-paste="{{inputHandler}}">
         </div>
       </div>
 
@@ -115,10 +115,70 @@ A proper select input for the Polymer word.
 
   Polymer('select-input', {
 
+
+    ready: function() {
+
+      var _template;
+
+      _template = this.querySelector('template[select-item]');
+      if (_template) {
+        var t = document.createElement('template');
+        t.id = 'selectedItemTemplate';
+        t.innerHTML = _template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.selectedItemTemplate);
+      }
+
+      _template = this.querySelector('template[data-item]');
+      if (_template) {
+        var t = document.createElement('template');
+        t.id = 'itemTemplate';
+        t.innerHTML = _template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.itemTemplate);
+      }
+
+      this._emptyAction = this.querySelector('paper-item') || false;
+      if (this._emptyAction)
+        this._emptyAction.classList.add('empty-action');
+
+      this.disabledAttributeHandler();
+      this.placeholderAttributeHandler();
+      this.labelFieldAttributeHandler();
+      this.valueFieldAttributeHandler();
+      this.nonmatchingAttributeHandler();
+      this.multipleAttributeHandler();
+      this.uniqueAttributeHandler();
+      this.keepInputOnBlurAttributeHandler();
+      this.selectInputOnBlurAttributeHandler();
+
+      // this.input = this.input || '';
+      this.$.selectInput.textContent = '';
+
+      this.commit();
+    },
+
+    domReady: function() {
+      if (this.parentElement.tagName.toLowerCase() === 'paper-input-decorator') {
+        this.parentElement.input = this;
+      }
+      this.data = this.data || [];
+      this.value = this.value || (this.multiple ? [] : null);
+      this.$.selectInput.textContent = this.input || '';
+      if (this.hasAttribute('autofocus'))
+        this._focus();
+    },
+
     /**
      * selected item(s)
      *
      * @attribute value
+     * @type String
+     * @default null
+     */
+
+    /**
+     * suggested select items
+     *
+     * @attribute data
      * @type String
      * @default null
      */
@@ -156,31 +216,108 @@ A proper select input for the Polymer word.
     input: '',
 
     inputChanged: function(oldValue, newValue) {
-      if (this.$ && this.$.selectInput)
-        this.$.selectInput.innerText = newValue;
-      // console.log('inputChanged', oldValue, newValue);
+      // console.log('inputChanged', arguments);
+      if (newValue !== oldValue)
+        this.fire('input-changed', {
+          value: newValue
+        });
+      // if (this.$ && this.$.selectInput && this.$.selectInput.textContent !== newValue)
+      //   this.$.selectInput.textContent = newValue;
     },
-
-    // set input(value) {
-    //   if (this.$ && this.$.selectInput)
-    //     this.$.selectInput.innerText = value;
-    //   this.input = value;
-    // },
 
     inputHandler: function(event, detail, selectInput) {
       event.stopPropagation();
-      this.input = selectInput.innerText.trim();
-      // this.fireInputChangedEvent();
-      // console.log('input changed', this.input, arguments);
+      var s = selectInput.textContent;
+      var st = s.trim();
+      if (st !== s)
+        selectInput.textContent = st;
+      this.input = st;
+      // console.log('inputHandler', s, st, arguments);
     },
 
-    /**
-     * suggested select items
-     *
-     * @attribute data
-     * @type String
-     * @default null
-     */
+    keydownHandler: function(event, detail, selectInput) {
+
+      // return;
+
+      var activeDataItem, topDataItem, value;
+      switch (event.keyCode) {
+        case 8: // backspace
+          if (this.multiple && this.input.length === 0 && this.value.length > 0) {
+            this.value.pop();
+            this.commit();
+            event.preventDefault();
+          }
+          break;
+        case 188: // comma
+        case 13: // enter
+          activeDataItem = this.$.selectDataListMenu.selectedItem;
+          topDataItem = this.$.selectDataList.querySelector('select-data-item');
+          if (activeDataItem && !activeDataItem.classList.contains('empty-action')) {
+            this.selectItem(activeDataItem.querySelector('select-data-item').value);
+          } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
+            this.selectItem(topDataItem.value);
+          } else if (this.nonmatching && this.input.length > 0) {
+            value = {};
+            value[this.labelField] = this.input;
+            this.selectItem(value);
+          }
+          event.preventDefault();
+          break;
+
+        case 27: // escape
+          if (this.data.length > 0) {
+            this.data.length = 0;
+            event.preventDefault();
+          }
+          break;
+
+          // case 38: // up arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('up arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
+
+          // case 40: // down arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('down arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
+      }
+    },
+
+    keyupHandler: function(event, detail, selectInput) {
+
+      return;
+
+      var inputChanged = true;
+      switch (event.keyCode) {
+        case 8: // backspace
+          if (this.input.length === 0) {
+            inputChanged = false;
+          }
+          break;
+        case 9: // tab
+        case 13: // enter
+        case 16: // shift
+        case 17: // ctrl
+        case 18: // alt
+        case 27: // escape
+        case 37: // left arrow
+        case 38: // up arrow
+        case 39: // right arrow
+        case 40: // down arrow
+          inputChanged = false;
+          break;
+      }
+      if (inputChanged === true) {
+        this._dataItemTapped = false;
+        this.fireInputChangedEvent();
+      }
+    },
 
     /**
      * The `input-changed` event is fired when text input is changed
@@ -196,79 +333,13 @@ A proper select input for the Polymer word.
      * @param {String} detail select value
      */
 
-    _emptyAction: false,
-
-    _dataItemTapped: false,
-
-    attributeChanged: function(attr, oldValue, newValue) {
-      if (this[attr + 'AttributeHandler']) {
-        this[attr + 'AttributeHandler'](oldValue, newValue);
-      }
-    },
-
-    ready: function() {
-
-      var _template;
-
-      _template = this.querySelector('template[select-item]');
-      if (_template) {
-        var t = document.createElement('template');
-        t.id = 'selectedItemTemplate';
-        t.innerHTML = _template.ref_.innerHTML;
-        this.shadowRoot.replaceChild(t, this.$.selectedItemTemplate);
-      }
-
-      _template = this.querySelector('template[data-item]');
-      if (_template) {
-        var t = document.createElement('template');
-        t.id = 'itemTemplate';
-        t.innerHTML = _template.ref_.innerHTML;
-        this.shadowRoot.replaceChild(t, this.$.itemTemplate);
-      }
-
-      this._emptyAction = this.querySelector('paper-item') || false;
-      if (this._emptyAction)
-        this._emptyAction.classList.add('empty-action');
-      this.disabledAttributeHandler();
-      this.placeholderAttributeHandler();
-      this.labelFieldAttributeHandler();
-      this.valueFieldAttributeHandler();
-      this.nonmatchingAttributeHandler();
-      this.multipleAttributeHandler();
-      this.uniqueAttributeHandler();
-      this.keepInputOnBlurAttributeHandler();
-      this.selectInputOnBlurAttributeHandler();
-      this.commit();
-    },
-
-    domReady: function() {
-      if (this.parentElement.tagName.toLowerCase() === 'paper-input-decorator') {
-        this.parentElement.input = this;
-      }
-      this.data = this.data || [];
-      this.value = this.value || (this.multiple ? [] : null);
-      this.input = '';
-    },
-
-    selectItem: function(value) {
-      var _value = this.valueFilter(value);
-      if (this.multiple) {
-        if (!this.unique || this.value.indexOf(_value) === -1)
-          this.value.push(_value);
-      } else
-        this.value = _value;
-      this.commit();
-      this.clear();
-      this.data.length = 0;
-    },
-
-
     refresh: function(selector, root) {
       if (!root)
         root = this.shadowRoot;
       if (!selector)
         selector = 'template';
       Array.prototype.forEach.call(root.querySelectorAll(selector), function(t) {
+        // console.log('refreshing', t);
         try {
           t.iterator_.updateIteratedValue();
         } catch (e) {}
@@ -276,7 +347,35 @@ A proper select input for the Polymer word.
     },
 
     dataChanged: function() {
-      this.refresh('template[repeat]', this.$.selectDataList);
+      // console.log('dataChanged', arguments);
+      // if (this.input && this.data && this.data.length)
+        // this.refresh('template', this.$.selectDataList);
+      if (this.data && this.data.length || this._emptyAction)
+        this._dataItemTapped = false;
+    },
+
+    _emptyAction: false,
+
+    _dataItemTapped: false,
+
+    attributeChanged: function(attr, oldValue, newValue) {
+      // console.log(attr, oldValue, newValue);
+      if (this[attr + 'AttributeHandler']) {
+        this[attr + 'AttributeHandler'](oldValue, newValue);
+      }
+    },
+
+    selectItem: function(value) {
+      var _value = this.valueFilter(value);
+      if (this.multiple) {
+        if (!this.unique || this.value.indexOf(_value) === -1)
+          this.value.push(_value);
+        this._focus();
+      } else
+        this.value = _value;
+      this.commit();
+      this.clear();
+      this.data.length = 0;
     },
 
     _focus: function() {
@@ -288,7 +387,6 @@ A proper select input for the Polymer word.
         this.selectItem(this.input);
       else if (!this.keepInputOnBlur)
         this.clear();
-      //  this.$.selectInput.blur();
     },
 
     reset: function() {
@@ -298,9 +396,9 @@ A proper select input for the Polymer word.
     },
 
     clear: function() {
+      this.$.selectInput.textContent = '';
       this.input = '';
     },
-
 
     /**
      * `disabled` disabled
@@ -500,101 +598,11 @@ A proper select input for the Polymer word.
         this.value = null;
         this.clear();
       }
-      this.commit();
       this._focus();
+      this.commit();
     },
 
-    keydownHandler: function(event, detail, selectInput) {
-      var inputChanged = true;
-      var activeDataItem, topDataItem, value;
-      switch (event.keyCode) {
-        case 8: // backspace
-          if (this.multiple && this.input.length === 0 && this.value.length > 0) {
-            this.value.pop();
-            this.commit();
-          }
-          break;
-        case 32: // spacebar
-          // if (this.allowSpace === true) {
-          break;
-          // }
-        case 188: // comma
-        case 13: // enter
-          activeDataItem = this.$.selectDataListMenu.selectedItem;
-          topDataItem = this.$.selectDataList.querySelector('select-data-item');
-          if (activeDataItem && !activeDataItem.classList.contains('empty-action')) {
-            this.selectItem(activeDataItem.querySelector('select-data-item').value);
-          } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
-            this.selectItem(topDataItem.value);
-          } else if (this.nonmatching && this.input.length > 0) {
-            value = {};
-            value[this.labelField] = this.input;
-            this.selectItem(value);
-          }
-          inputChanged = false;
-          event.preventDefault();
-          break;
-
-        case 27: // escape
-          if (this.nonmatching === true || this.data.length > 0) {
-            this.data.length = 0;
-            event.preventDefault();
-          }
-          inputChanged = false;
-          break;
-
-          // case 38: // up arrow
-          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
-          //   if (activeDataItem) {
-          //     console.log('up arrow', activeDataItem);
-          //   }
-          //   inputChanged = false;
-          //   break;
-
-          // case 40: // down arrow
-          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
-          //   if (activeDataItem) {
-          //     console.log('down arrow', activeDataItem);
-          //   }
-          //   inputChanged = false;
-          //   break;
-      }
-    },
-
-    keyupHandler: function(event, detail, selectInput) {
-      var inputChanged = true;
-      switch (event.keyCode) {
-        case 8: // backspace
-          if (this.input.length === 0) {
-            inputChanged = false;
-          }
-          break;
-        case 9: // tab
-        case 13: // enter
-        case 16: // shift
-        case 17: // ctrl
-        case 18: // alt
-        case 27: // escape
-        case 37: // left arrow
-        case 38: // up arrow
-        case 39: // right arrow
-        case 40: // down arrow
-          inputChanged = false;
-          break;
-      }
-      if (inputChanged === true) {
-        this._dataItemTapped = false;
-        this.fireInputChangedEvent();
-      }
-    },
-
-    fireInputChangedEvent: function() {
-      this.fire('input-changed', {
-        value: this.input
       });
-    }
-
-  });
   </script>
 
 </polymer-element>
