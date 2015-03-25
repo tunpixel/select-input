@@ -3,7 +3,7 @@
 <link href="../core-menu/core-menu.html" rel="import">
 <link href="../paper-item/paper-item.html" rel="import">
 <!--
-A proper select input for the Polymer word.
+A proper select input for the Polymer world.
 
 ##### Example
 
@@ -23,7 +23,7 @@ A proper select input for the Polymer word.
     </paper-input-decorator>
 
 @element select-input
-@blurb A proper select input for the Polymer word.
+@blurb A proper select input for the Polymer world.
 @status alpha
 @homepage http://tunpixel.github.io/select-input
 -->
@@ -73,7 +73,7 @@ A proper select input for the Polymer word.
         </select-input-item>
       </template>
 
-      <input id="placeholder" hidden?="{{value.length || input || !placeholder}}" placeholder="{{placeholder}}" tabindex="-1">
+      <input id="placeholder" hidden?="{{ !placeholder || input.length || (multiple && value.length) || (!multiple && value) }}" placeholder="{{placeholder}}" tabindex="-1">
 
       <div id="input-container" hidden?="{{!multiple && value}}">
         <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}" on-paste="{{inputHandler}}">
@@ -257,9 +257,7 @@ A proper select input for the Polymer word.
           } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
             this.selectItem(topDataItem.value);
           } else if (this.nonmatching && this.input.length > 0) {
-            value = {};
-            value[this.labelField] = this.input;
-            this.selectItem(value);
+            this.selectItem(this.input);
           }
           event.preventDefault();
           break;
@@ -349,7 +347,7 @@ A proper select input for the Polymer word.
     dataChanged: function() {
       // console.log('dataChanged', arguments);
       // if (this.input && this.data && this.data.length)
-        // this.refresh('template', this.$.selectDataList);
+      // this.refresh('template', this.$.selectDataList);
       if (this.data && this.data.length || this._emptyAction)
         this._dataItemTapped = false;
     },
@@ -602,7 +600,7 @@ A proper select input for the Polymer word.
       this.commit();
     },
 
-      });
+  });
   </script>
 
 </polymer-element>

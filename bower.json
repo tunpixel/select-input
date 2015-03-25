@@ -1,10 +1,10 @@
 {
   "name": "select-input",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "authors": [
     "Tunpixel contact@tunpixel.tn"
   ],
-  "description": "A proper select input for the Polymer word.",
+  "description": "A proper select input for the Polymer world.",
   "keywords": [
     "web-component",
     "web-components",
