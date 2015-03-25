@@ -1,0 +1,606 @@
+<link href="../polymer/polymer.html" rel="import">
+<link href="../paper-dropdown/paper-dropdown.html" rel="import">
+<link href="../core-menu/core-menu.html" rel="import">
+<link href="../paper-item/paper-item.html" rel="import">
+<!--
+A proper select input for the Polymer world.
+
+##### Example
+
+    <paper-input-decorator label="Select your favorite programming language" floatingLabel>
+      <select-input id="selectInput6" labelField="name" multiple nonmatching selectInputOnBlur on-input-changed="{{inputChanged}}">
+        <template select-item>
+          <strong>{{item.name}}</strong>
+        </template>
+        <template data-item>
+          <strong style="margin-right: 5px;">{{item.id}}.</strong> {{item.name}}
+        </template>
+        <paper-progress indeterminate></paper-progress>
+      </select-input>
+      <paper-item onclick="alert('Element added.')">
+         Add <strong style="margin-left: 5px;"> {{$.selectInput6.input}}</strong>
+      </paper-item>
+    </paper-input-decorator>
+
+@element select-input
+@blurb A proper select input for the Polymer world.
+@status alpha
+@homepage http://tunpixel.github.io/select-input
+-->
+
+<polymer-element name="select-input-item" attributes="value" noscript>
+  <template>
+    <style>
+    :host {
+      display: block;
+    }
+    </style>
+    <content></content>
+  </template>
+</polymer-element>
+
+<polymer-element name="select-data-item" attributes="value" noscript>
+  <template>
+    <style>
+    :host {
+      display: none;
+    }
+    </style>
+    <content></content>
+  </template>
+</polymer-element>
+
+<polymer-element name="select-input" attributes="value data input" i-tabindex="0" on-focus="{{_focus}}" on-blur="{{_blur}}">
+
+  <template>
+    <link rel="stylesheet" href="select-input.css" shim-shadowdom>
+
+    <div id="selectList" on-tap="{{elementTapped}}" i-on-enter="{{elementTapped}}">
+
+      <template if="{{multiple}}">
+        <template repeat="{{item in value}}">
+          <select-input-item value="{{item}}">
+            <template ref="selectedItemTemplate" bind></template>
+            <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
+          </select-input-item>
+        </template>
+      </template>
+
+      <template if="{{!multiple && value}}">
+        <select-input-item value="{{value}}">
+          <template ref="selectedItemTemplate" bind="{{value as item}}"></template>
+          <a on-tap="{{removeTapped}}" i-on-enter="{{removeTapped}}"></a>
+        </select-input-item>
+      </template>
+
+      <input id="placeholder" hidden?="{{ !placeholder || input.length || (multiple && value.length) || (!multiple && value) }}" placeholder="{{placeholder}}" tabindex="-1">
+
+      <div id="input-container" hidden?="{{!multiple && value}}">
+        <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}" on-paste="{{inputHandler}}">
+        </div>
+      </div>
+
+      <a id="clearButton" hidden?="{{!input}}" on-tap="{{clear}}" i-on-enter="{{clear}}"></a>
+
+    </div>
+
+    <content select="paper-progress"></content>
+
+    <paper-dropdown id="selectDataList" opened?="{{(_emptyAction || data.length) && !!input && !_dataItemTapped}}" transition="">
+      <core-menu id="selectDataListMenu" on-core-select="{{dataItemSelected}}">
+        <template repeat="{{item in data}}">
+          <paper-item>
+            <select-data-item value="{{item}}"></select-data-item>
+            <template ref="itemTemplate" bind></template>
+          </paper-item>
+        </template>
+        <template if="{{_emptyAction && !data.length}}">
+          <content select="paper-item"></content>
+        </template>
+      </core-menu>
+    </paper-dropdown>
+
+    <template id="selectedItemTemplate">
+      {{item|labelFilter}}
+    </template>
+
+    <template id="itemTemplate">
+      <strong>{{item|labelFilter|highlight}}</strong>{{item|labelFilter|highlightAfter}}
+    </template>
+
+  </template>
+
+  <script>
+  'use strict';
+
+  Polymer('select-input', {
+
+
+    ready: function() {
+
+      var _template;
+
+      _template = this.querySelector('template[select-item]');
+      if (_template) {
+        var t = document.createElement('template');
+        t.id = 'selectedItemTemplate';
+        t.innerHTML = _template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.selectedItemTemplate);
+      }
+
+      _template = this.querySelector('template[data-item]');
+      if (_template) {
+        var t = document.createElement('template');
+        t.id = 'itemTemplate';
+        t.innerHTML = _template.ref_.innerHTML;
+        this.shadowRoot.replaceChild(t, this.$.itemTemplate);
+      }
+
+      this._emptyAction = this.querySelector('paper-item') || false;
+      if (this._emptyAction)
+        this._emptyAction.classList.add('empty-action');
+
+      this.disabledAttributeHandler();
+      this.placeholderAttributeHandler();
+      this.labelFieldAttributeHandler();
+      this.valueFieldAttributeHandler();
+      this.nonmatchingAttributeHandler();
+      this.multipleAttributeHandler();
+      this.uniqueAttributeHandler();
+      this.keepInputOnBlurAttributeHandler();
+      this.selectInputOnBlurAttributeHandler();
+
+      // this.input = this.input || '';
+      this.$.selectInput.textContent = '';
+
+      this.commit();
+    },
+
+    domReady: function() {
+      if (this.parentElement.tagName.toLowerCase() === 'paper-input-decorator') {
+        this.parentElement.input = this;
+      }
+      this.data = this.data || [];
+      this.value = this.value || (this.multiple ? [] : null);
+      this.$.selectInput.textContent = this.input || '';
+      if (this.hasAttribute('autofocus'))
+        this._focus();
+    },
+
+    /**
+     * selected item(s)
+     *
+     * @attribute value
+     * @type String
+     * @default null
+     */
+
+    /**
+     * suggested select items
+     *
+     * @attribute data
+     * @type String
+     * @default null
+     */
+
+    /**
+     * The "committed" value of the input, ie. the input value when the user
+     * hits the "enter" key or blurs the input after changing the value. You
+     * can bind to this value instead of listening for the "change" event.
+     * Setting this property has no effect on the input value.
+     *
+     * @property committedValue
+     * @type string
+     * @default null
+     */
+    committedValue: null,
+
+    validity: null,
+
+    checkValidity: function() {
+      this.validity = {
+        valid: !this.hasAttribute('required') || !!(this.multiple ? this.value && this.value.length : this.value)
+      };
+    },
+
+    /**
+     * `input` input
+     *
+     * Default is ...
+     *
+     * @attribute input
+     * @type String
+     * @default ''
+     */
+
+    input: '',
+
+    inputChanged: function(oldValue, newValue) {
+      // console.log('inputChanged', arguments);
+      if (newValue !== oldValue)
+        this.fire('input-changed', {
+          value: newValue
+        });
+      // if (this.$ && this.$.selectInput && this.$.selectInput.textContent !== newValue)
+      //   this.$.selectInput.textContent = newValue;
+    },
+
+    inputHandler: function(event, detail, selectInput) {
+      event.stopPropagation();
+      var s = selectInput.textContent;
+      var st = s.trim();
+      if (st !== s)
+        selectInput.textContent = st;
+      this.input = st;
+      // console.log('inputHandler', s, st, arguments);
+    },
+
+    keydownHandler: function(event, detail, selectInput) {
+
+      // return;
+
+      var activeDataItem, topDataItem, value;
+      switch (event.keyCode) {
+        case 8: // backspace
+          if (this.multiple && this.input.length === 0 && this.value.length > 0) {
+            this.value.pop();
+            this.commit();
+            event.preventDefault();
+          }
+          break;
+        case 188: // comma
+        case 13: // enter
+          activeDataItem = this.$.selectDataListMenu.selectedItem;
+          topDataItem = this.$.selectDataList.querySelector('select-data-item');
+          if (activeDataItem && !activeDataItem.classList.contains('empty-action')) {
+            this.selectItem(activeDataItem.querySelector('select-data-item').value);
+          } else if (topDataItem && (this.input === this.labelFilter(topDataItem.value))) {
+            this.selectItem(topDataItem.value);
+          } else if (this.nonmatching && this.input.length > 0) {
+            this.selectItem(this.input);
+          }
+          event.preventDefault();
+          break;
+
+        case 27: // escape
+          if (this.data.length > 0) {
+            this.data.length = 0;
+            event.preventDefault();
+          }
+          break;
+
+          // case 38: // up arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('up arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
+
+          // case 40: // down arrow
+          //   activeDataItem = this.$.selectDataListMenu.selectedItem;
+          //   if (activeDataItem) {
+          //     console.log('down arrow', activeDataItem);
+          //   }
+          //   inputChanged = false;
+          //   break;
+      }
+    },
+
+    keyupHandler: function(event, detail, selectInput) {
+
+      return;
+
+      var inputChanged = true;
+      switch (event.keyCode) {
+        case 8: // backspace
+          if (this.input.length === 0) {
+            inputChanged = false;
+          }
+          break;
+        case 9: // tab
+        case 13: // enter
+        case 16: // shift
+        case 17: // ctrl
+        case 18: // alt
+        case 27: // escape
+        case 37: // left arrow
+        case 38: // up arrow
+        case 39: // right arrow
+        case 40: // down arrow
+          inputChanged = false;
+          break;
+      }
+      if (inputChanged === true) {
+        this._dataItemTapped = false;
+        this.fireInputChangedEvent();
+      }
+    },
+
+    /**
+     * The `input-changed` event is fired when text input is changed
+     *
+     * @event input-changed
+     * @param {String} detail input value
+     */
+
+    /**
+     * The `input` event is fired when the select value is changed
+     *
+     * @event input
+     * @param {String} detail select value
+     */
+
+    refresh: function(selector, root) {
+      if (!root)
+        root = this.shadowRoot;
+      if (!selector)
+        selector = 'template';
+      Array.prototype.forEach.call(root.querySelectorAll(selector), function(t) {
+        // console.log('refreshing', t);
+        try {
+          t.iterator_.updateIteratedValue();
+        } catch (e) {}
+      });
+    },
+
+    dataChanged: function() {
+      // console.log('dataChanged', arguments);
+      // if (this.input && this.data && this.data.length)
+      // this.refresh('template', this.$.selectDataList);
+      if (this.data && this.data.length || this._emptyAction)
+        this._dataItemTapped = false;
+    },
+
+    _emptyAction: false,
+
+    _dataItemTapped: false,
+
+    attributeChanged: function(attr, oldValue, newValue) {
+      // console.log(attr, oldValue, newValue);
+      if (this[attr + 'AttributeHandler']) {
+        this[attr + 'AttributeHandler'](oldValue, newValue);
+      }
+    },
+
+    selectItem: function(value) {
+      var _value = this.valueFilter(value);
+      if (this.multiple) {
+        if (!this.unique || this.value.indexOf(_value) === -1)
+          this.value.push(_value);
+        this._focus();
+      } else
+        this.value = _value;
+      this.commit();
+      this.clear();
+      this.data.length = 0;
+    },
+
+    _focus: function() {
+      this.$.selectInput.focus();
+    },
+
+    _blur: function() {
+      if (this.nonmatching && this.selectInputOnBlur && this.input)
+        this.selectItem(this.input);
+      else if (!this.keepInputOnBlur)
+        this.clear();
+    },
+
+    reset: function() {
+      this.value = this.multiple ? [] : null;
+      this.clear();
+      this.commit();
+    },
+
+    clear: function() {
+      this.$.selectInput.textContent = '';
+      this.input = '';
+    },
+
+    /**
+     * `disabled` disabled
+     *
+     * Default is ...
+     *
+     * @property disabled
+     * @type Boolean
+     * @default false
+     */
+    disabled: false,
+
+    disabledAttributeHandler: function(oldValue, newValue) {
+      this.disabled = this.hasAttribute('disabled');
+      if (this.disabled) {
+        this.setAttribute('aria-disabled', '');
+      } else {
+        this.removeAttribute('aria-disabled');
+      }
+    },
+
+    placeholderAttributeHandler: function(oldValue, newValue) {
+      this.placeholder = newValue || this.getAttribute('placeholder');
+      if (this.placeholder) {
+        this.setAttribute('aria-label', this.placeholder);
+      } else {
+        this.removeAttribute('aria-label');
+      }
+    },
+
+    /**
+     * `labelField` field to display
+     *
+     * When `null`, selected object will be diplayed
+     *
+     * @property labelField
+     * @type String
+     * @default null
+     */
+    labelField: null,
+
+    labelFieldAttributeHandler: function(oldValue, newValue) {
+      this.labelField = newValue || this.getAttribute('labelField');
+    },
+
+    /**
+     * `valueField` field to user as value
+     *
+     * When `null`, selected object will be used as value
+     *
+     * @property valueField
+     * @type String
+     * @default null
+     */
+    valueField: null,
+
+    valueFieldAttributeHandler: function(oldValue, newValue) {
+      this.valueField = newValue || this.getAttribute('valueField');
+      // this.labelField = this.valueField;
+    },
+
+    /**
+     * `multiple` multiple
+     *
+     * Default is ...
+     *
+     * @property multiple
+     * @type Boolean
+     * @default false
+     */
+    multiple: false,
+
+    multipleAttributeHandler: function(oldValue, newValue) {
+      this.multiple = this.hasAttribute('multiple');
+    },
+
+    /**
+     * `unique` unique
+     *
+     * Default is false
+     *
+     * @property unique
+     * @type Boolean
+     * @default false
+     */
+    unique: false,
+
+    uniqueAttributeHandler: function(oldValue, newValue) {
+      this.unique = this.multiple ? this.hasAttribute('unique') : true;
+    },
+
+    /**
+     * `nonmatching` nonmatching
+     *
+     * Default is ...
+     *
+     * @property nonmatching
+     * @type Boolean
+     * @default false
+     */
+    nonmatching: false,
+
+    nonmatchingAttributeHandler: function(oldValue, newValue) {
+      this.nonmatching = this.hasAttribute('nonmatching');
+    },
+
+    /**
+     * `keepInputOnBlur` keepInputOnBlur
+     *
+     * Default is ...
+     *
+     * @property keepInputOnBlur
+     * @type Boolean
+     * @default false
+     */
+    keepInputOnBlur: false,
+
+    keepInputOnBlurAttributeHandler: function(oldValue, newValue) {
+      this.keepInputOnBlur = this.hasAttribute('keepInputOnBlur');
+    },
+
+    /**
+     * `selectInputOnBlur` selectInputOnBlur
+     *
+     * Valid when `nonmatching` is `true`
+     *
+     * Default is `false`
+     *
+     * @property selectInputOnBlur
+     * @type Boolean
+     * @default false
+     */
+    selectInputOnBlur: false,
+
+    selectInputOnBlurAttributeHandler: function(oldValue, newValue) {
+      if (!this.nonmatching)
+        this.selectInputOnBlur = this.hasAttribute('selectInputOnBlur');
+    },
+
+    /**
+     * Commits the `value` to `committedValue`
+     *
+     * @method commit
+     */
+    commit: function() {
+      var oldValue = this.committedValue;
+      this.committedValue = this.value;
+      this.checkValidity();
+      this.fire('input', {
+        old: oldValue,
+        value: this.value
+      });
+    },
+
+    labelFilter: function(obj) {
+      if (this.valueField)
+        return this.valueFilter(obj);
+      if (this.labelField === null)
+        return obj || '';
+      return typeof obj === 'object' && obj ? obj[this.labelField] : obj || '';
+    },
+
+    valueFilter: function(obj) {
+      if (this.valueField === null)
+        return obj || '';
+      return typeof obj === 'object' && obj ? obj[this.valueField] : obj || '';
+    },
+
+    highlight: function(text) {
+      return text.substr(0, this.input.length);
+    },
+
+    highlightAfter: function(text) {
+      return text.substr(this.input.length);
+    },
+
+    elementTapped: function(event, detail, sender) {
+      this._focus();
+    },
+
+    dataItemSelected: function(event, detail, sender) {
+      if (detail.isSelected) {
+        this._dataItemTapped = true;
+        if (!detail.item.classList.contains('empty-action'))
+          this.selectItem(detail.item.children[0].value);
+        this.data.length = 0;
+        sender.selected = null;
+      }
+    },
+
+    removeTapped: function(event, detail, sender) {
+      if (this.multiple) {
+        var value = sender.parentElement.value;
+        var index = this.value.indexOf(value);
+        this.value.splice(index, 1);
+      } else {
+        this.value = null;
+        this.clear();
+      }
+      this._focus();
+      this.commit();
+    },
+
+  });
+  </script>
+
+</polymer-element>

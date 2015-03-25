@@ -1,0 +1,7 @@
+{
+  "name": "select-input#gh-pages",
+  "private": true,
+  "dependencies": {
+    "select-input": "tunpixel/select-input#master"
+  }
+}

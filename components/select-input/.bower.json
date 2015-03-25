@@ -1,0 +1,39 @@
+{
+  "name": "select-input",
+  "authors": [
+    "Tunpixel contact@tunpixel.tn"
+  ],
+  "description": "A proper select input for the Polymer world.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "select"
+  ],
+  "main": "select-input.html",
+  "license": "MIT",
+  "homepage": "https://github.com/tunpixel/select-input/",
+  "ignore": [
+    "/.*",
+    "/tests/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.5",
+    "core-menu": "Polymer/core-menu#~0.5.5",
+    "paper-dropdown": "Polymer/paper-dropdown#~0.5.5",
+    "paper-item": "Polymer/paper-item#~0.5.5"
+  },
+  "devDependencies": {
+    "web-component-tester": "*"
+  },
+  "_release": "bb7b9b742d",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "bb7b9b742d99a3ae0ccb7a5f605a1ab0aadad7a8"
+  },
+  "_source": "git://github.com/tunpixel/select-input.git",
+  "_target": "master",
+  "_originalSource": "tunpixel/select-input",
+  "_direct": true
+}
