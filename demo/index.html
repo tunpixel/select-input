@@ -12,16 +12,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-
+    <title>select-input Demo</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <script src="../../web-component-tester/browser.js"></script>
+    <link rel="import" href="../select-input.html">
   </head>
   <body>
+
+    <p>An example of <code>&lt;select-input&gt;</code>:</p>
+
+    <button>Say Something</button>
+
+    <select-input author='{"name": "Lord Meowser", "image": "http://placekitten.com/g/200/300"}' fancy>
+      <h2>Hello select-input</h2>
+    </select-input>
+
     <script>
-      // Load and run all tests (.html, .js):
-      WCT.loadSuites([
-        'basic-test.html',
-      ]);
+      document.querySelector('button').addEventListener('click', function() {
+        alert(document.querySelector('select-input').sayHello('Hallo!'));
+      });
     </script>
+
   </body>
 </html>
