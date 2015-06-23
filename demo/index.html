@@ -12,24 +12,232 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <title>select-input Demo</title>
-    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="../select-input.html">
+    <title>paper-select Demo</title>
+    <script src="../../webcomponentsjs/webcomponents.js"></script>
+    <script>
+      window.Polymer = window.Polymer || {};
+      window.Polymer.dom = 'shadow';
+    </script>
+    <link rel="import" href="../../paper-input/paper-input.html">
+    <link rel="import" href="../../paper-input/paper-input-container.html">
+    <link rel="import" href="../../paper-progress/paper-progress.html">
+    <link rel="import" href="../paper-select.html">
+    <style>
+    body {
+      background: #fafafa;
+      font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      color: #333;
+    }
+    </style>
+
   </head>
   <body>
 
-    <p>An example of <code>&lt;select-input&gt;</code>:</p>
+    <template id="template" is="dom-bind">
 
-    <button>Say Something</button>
+      <h2>Data set</h2>
 
-    <select-input author='{"name": "Lord Meowser", "image": "http://placekitten.com/g/200/300"}' fancy>
-      <h2>Hello select-input</h2>
-    </select-input>
+      <pre>[[json(data)]]</pre>
+
+      <!-- <hr>
+
+      <paper-input-container>
+        <label>Your name</label>
+        <input is="iron-input">
+      </paper-input-container> -->
+
+      <hr>
+
+      <h2>simple select input</h2>
+
+      <pre>input: <span>{{json(selectInput1Input)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput1" multiple unique label-field="name" on-input-changed="inputChanged" input="{{selectInput1Input}}" value="{{selectInput1Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectInput1Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput2" multiple unique nonmatching select-on-blur label-field="name" on-input-changed="inputChanged" value="{{selectInput2Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectInput2Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput3" multiple unique on-input-changed="inputChanged_" value="{{selectInput3Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{selectInput3Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput4" multiple unique nonmatching select-on-blur on-input-changed="inputChanged_" value="{{selectInput4Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectInput4Value)}}</span></pre>
+
+      <hr>
+
+      <h2>simple select-one input</h2>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectOneInput1" label-field="name" on-input-changed="inputChanged" value="{{selectOneInput1Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectOneInput2Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectOneInput2" nonmatching select-on-blur label-field="name" on-input-changed="inputChanged" value="{{selectOneInput2Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectOneInput2Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectOneInput3" label-field="name" on-input-changed="inputChanged_" value="{{selectOneInput3Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectOneInput3Value)}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectOneInput4" nonmatching select-on-blur label-field="name" on-input-changed="inputChanged_" value="{{selectOneInput4Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectOneInput4Value)}}</span></pre>
+
+      <hr>
+
+      <h2>select input with validation</h2>
+
+      <paper-input-container i-always-float-label autoValidate required error="This field is required">
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput5" multiple label-field="name" on-input-changed="inputChanged" required value="{{selectInput5Value}}">
+        </paper-select>
+      </paper-input-container>
+
+      <pre>value: <span>{{json(selectInput5Value)}}</span></pre>
+
+      <hr>
+
+      <h2>select input with custom not found select action</h2>
+
+      <pre>input: <span>{{selectInput6Input}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput6" label-field="name" multiple on-input-changed="inputChanged" input="{{selectInput6Input}}">
+          <paper-item onclick="alert('Element added.')">
+            Add <strong style="margin-left: 5px;"> <span>{{selectInput6Input}}</span></strong>
+          </paper-item>
+        </paper-select>
+      </paper-input-container>
+
+      <hr>
+
+      <h2>select input with custom select template</h2>
+
+      <pre>input: <span>{{selectInput6Input}}</span></pre>
+
+      <paper-input-container i-always-float-label>
+        <label>Select your favorite programming language</label>
+        <paper-select id="selectInput6" label-field="name" multiple nonmatching select-on-blur on-input-changed="inputChanged" input="{{selectInput6Input}}">
+          <template select-item>
+            <strong>{{item.name}}</strong>
+          </template>
+          <template data-item>
+            <strong style="margin-right: 5px;"><span>{{item.id}}</span>.</strong> <span>{{item.name}}</span>
+          </template>
+          <paper-progress indeterminate></paper-progress>
+        </paper-select>
+      </paper-input-container>
+
+    </template>
 
     <script>
-      document.querySelector('button').addEventListener('click', function() {
-        alert(document.querySelector('select-input').sayHello('Hallo!'));
+    'use strict';
+
+    var data = [{
+      id: 1,
+      name: "Python"
+    }, {
+      id: 2,
+      name: "JavaScript"
+    }, {
+      id: 3,
+      name: "HTML5"
+    }, {
+      id: 4,
+      name: "CSS3"
+    }, {
+      id: 5,
+      name: "AngularJS"
+    }, {
+      id: 6,
+      name: "Polymer"
+    // }, {
+    //   id: 7,
+    //   name: "PHP"
+    // }, {
+    //   id: 8,
+    //   name: "Java"
+    }];
+
+    var template = document.querySelector('#template');
+
+    template.json = function(data) {
+      return JSON.stringify(data, null, 2);
+    };
+
+    template.inputChanged = function(e) {
+      var input = (e.detail.value || '').trim().toLowerCase();
+      if (input)
+        e.target.data = data.filter(function(item) {
+          return item.name.toLowerCase().indexOf(input) === 0;
+        });
+      console.log('input-changed', e.detail.value, e.target.data);
+    };
+
+    template.inputChanged_ = function(e) {
+      var input = (e.detail.value || '').trim().toLowerCase();
+      if (input)
+        e.target.data = data.filter(function(item) {
+          return item.name.toLowerCase().indexOf(input) === 0;
+        }).map(function(e) {
+          return e.name;
+        });
+    };
+
+    template.addEventListener('dom-change', function() {
+
+      template.data = data;
+
+      template.selectInput2Value = data.slice(1, 3);
+
+      template.selectOneInput2Value = data[0];
+
+      template.selectInput4Value = template.selectInput2Value.map(function(item) {
+        return item.name;
       });
+
+      template.selectOneInput4Value = template.selectOneInput2Value.name;
+
+    });
+
     </script>
 
   </body>

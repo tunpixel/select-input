@@ -1,0 +1,433 @@
+
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-menu/paper-menu.html">
+<link rel="import" href="../paper-item/paper-item.html">
+
+
+<!--
+selected item wrapper
+
+Example:
+
+    <paper-select-item value="{{value}}">
+      ...
+    </paper-select-item>
+
+@group Paper Select
+@element paper-select-item
+-->
+<dom-module id="paper-select-item">
+  <style>
+  :host {
+    display: inline-block;
+  }
+  </style>
+  <template>
+    <content></content>
+  </template>
+</dom-module>
+
+<script>
+  'use strict';
+
+  Polymer({
+
+    is: 'paper-select-item',
+
+    properties: {
+
+      /**
+       * `value` indicates element's value
+       */
+      value: {
+        type: Object,
+      },
+
+    },
+
+  });
+</script>
+
+<!--
+suggession value holder
+
+Example:
+
+    <select-data-item value="{{value}}"></select-data-item>
+
+@group Paper Select
+@element select-data-item
+-->
+<dom-module id="select-data-item">
+  <style>
+  :host {
+    display: none;
+  }
+  </style>
+  <template></template>
+</dom-module>
+
+<script>
+  'use strict';
+
+  Polymer({
+
+    is: 'select-data-item',
+
+    properties: {
+
+      /**
+       * `value` indicates element's value
+       */
+      value: {
+        type: Object,
+      },
+
+    },
+
+  });
+</script>
+
+
+<!--
+A proper select input for the Polymer world.
+
+Example:
+
+    <paper-select></paper-select>
+
+@group Paper Select
+@element paper-select
+@demo demo/index.html
+-->
+<dom-module id="paper-select">
+
+  <link rel="import" type="css" href="./paper-select.css">
+
+  <template>
+
+    <div id="selectList" on-tap="elementTapped" i-on-enter="elementTapped">
+
+      <template is="dom-if" if="{{value}}">
+
+        <template is="dom-if" if="{{multiple}}">
+          <template is="dom-repeat" items="{{value}}">
+            <paper-select-item value="{{item}}">
+              <span>{{labelFilter(item)}}</span>
+              <!-- <template ref="selectedItemTemplate"></template> -->
+              <a on-tap="removeTapped" i-on-enter="removeTapped"></a>
+            </paper-select-item>
+          </template>
+        </template>
+
+        <template is="dom-if" if="{{!multiple}}">
+          <paper-select-item value="{{item}}">
+            <span>{{labelFilter(item)}}</span>
+            <!-- <template ref="selectedItemTemplate"></template> -->
+            <a on-tap="removeTapped" i-on-enter="removeTapped"></a>
+          </paper-select-item>
+        </template>
+
+      </template>
+
+      <!-- <input id="input" value="{{input::input}}"> -->
+
+      <input id="selectInput" value="{{input::input}}" tabindex="-1">
+
+      <!-- <input id="selectInput" is="iron-input" bind-value="{{input}}" tabindex="-1"> -->
+
+      <!-- <input id="placeholder" hidden$="{{ !placeholder || input.length || (multiple && value.length) || (!multiple && value) }}" placeholder="{{placeholder}}" value="{{input::input}}" tabindex="-1"> -->
+
+      <!-- <div id="input-container" hidden$="{{!multiple && value}}">
+        <div id="selectInput" contenteditable="true" on-keydown="{{keydownHandler}}" on-keyup="{{keyupHandler}}" on-input="{{inputHandler}}" on-paste="{{inputHandler}}">
+        </div>
+      </div> -->
+
+      <a id="clearButton" hidden$="{{!input}}" on-tap="clear" i-on-enter="clear"></a>
+
+    </div>
+
+    <content select="paper-progress"></content>
+
+    <template is="dom-if" if="{{data.length}}">
+      <paper-menu id="selectDataList">
+        <template is="dom-repeat" items="{{data}}">
+          <paper-item>[[item.name]]</paper-item>
+        </template>
+      </paper-menu>
+    </template>
+
+    <template id="selectedItemTemplate">
+      {{labelFilter(item)}}
+    </template>
+
+    <template id="itemTemplate">
+      <strong>{{highlight(labelFilter(item))}}</strong><span>{{highlightAfter(labelFilter(item))}}
+    </template>
+
+  </template>
+
+</dom-module>
+
+<script>
+  'use strict';
+
+  Polymer({
+
+    is: 'paper-select',
+    behaviors: [
+      Polymer.IronFormElementBehavior,
+      Polymer.PaperInputBehavior
+    ],
+
+    hostAttributes: {
+      role: 'button',
+      tabindex: 0
+    },
+
+    properties: {
+
+      /**
+       * `data` indicates element's data
+       */
+      data: {
+        type: Array,
+        value: function() {
+          return [];
+        },
+        notify: true
+      },
+
+      /**
+       * `input` indicates element"s text input
+       */
+      input: {
+        type: String,
+        value: '',
+        notify: true,
+        observer: '_bindInputChanged'
+      },
+
+      /**
+       * `bindValue` indicates element's bindValue
+       */
+      bindValue: {
+        observer: '_bindValueChanged',
+        type: Object,
+        notify: true,
+      },
+
+      /**
+       * `disabled` indicates element's disabled
+       */
+      // disabled: {
+      //   type: Boolean,
+      //   value: false,
+      //   reflectToAttribute: true,
+      // },
+
+      /**
+       * `multiple` indicates element's multiple
+       */
+      multiple: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+      },
+
+      /**
+       * `unique` indicates element's unique
+       */
+      unique: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+      },
+
+      /**
+       * `nonmatching` indicates element's nonmatching
+       */
+      nonmatching: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+      },
+
+      /**
+       * `selectOnBlur` indicates element's selectOnBlur
+       */
+      selectOnBlur: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+      },
+
+      /**
+       * `labelField` indicates element's labelField
+       */
+      labelField: {
+        type: String,
+        value: null
+      },
+
+      /**
+       * `valueField` indicates element's valueField
+       */
+      valueField: {
+        type: String,
+        value: null
+      },
+
+    },
+
+    _bindInputChanged: function(){
+      this.fire('input', {value: this.input});
+    },
+
+    _bindValueChanged: function() {
+      if (this.value !== this.bindValue) {
+        this.value = !this.bindValue ? '' : this.bindValue;
+      }
+      // manually notify because we don't want to notify until after setting value
+      this.fire('bind-value-changed', {value: this.bindValue});
+    },
+
+    // Element Lifecycle
+
+    created: function() {
+      this.toggleClass('paper-input-input', true);
+    },
+
+    ready: function() {
+      // `ready` is called after all elements have been configured, but
+      // propagates bottom-up. This element's children are ready, but parents
+      // are not.
+      //
+      // This is the point where you should make modifications to the DOM (when
+      // necessary), or kick off any processes the element wants to perform.
+
+      this.bindValue = this.value;
+    },
+
+    attached: function() {
+      // `attached` fires once the element and its parents have been inserted
+      // into a document.
+      //
+      // This is a good place to perform any work related to your element's
+      // visual state or active behavior (measuring sizes, beginning animations,
+      // loading resources, etc).
+
+      this.data = this.data || [];
+      // this.value = this.value || (this.multiple ? [] : null);
+      // this.input = this.input || '';
+    },
+
+    // Element Behavior
+
+
+    _focus: function() {
+      this.$.selectInput.focus();
+    },
+
+    _blur: function() {
+      if (this.nonmatching && this.selectInputOnBlur && this.input)
+        this.selectItem(this.input);
+      else if (!this.keepInputOnBlur)
+        this.clear();
+    },
+
+    reset: function() {
+      this.value = this.multiple ? [] : null;
+      this.clear();
+      this.commit();
+    },
+
+    clear: function() {
+      // this.$.selectInput.textContent = '';
+      this.input = '';
+    },
+
+
+    labelFilter: function(obj) {
+      if (this.valueField)
+        return this.valueFilter(obj);
+      if (this.labelField === null)
+        return obj || '';
+      return typeof obj === 'object' && obj ? obj[this.labelField] : obj || '';
+    },
+
+    valueFilter: function(obj) {
+      if (this.valueField === null)
+        return obj || '';
+      return typeof obj === 'object' && obj ? obj[this.valueField] : obj || '';
+    },
+
+    highlight: function(text) {
+      return text.substr(0, this.input.length);
+    },
+
+    highlightAfter: function(text) {
+      return text.substr(this.input.length);
+    },
+
+
+    elementTapped: function(event, detail) {
+      this._focus();
+    },
+
+    dataItemSelected: function(event, detail) {
+      if (detail.isSelected) {
+        this._dataItemTapped = true;
+        if (!detail.item.classList.contains('empty-action'))
+          this.selectItem(detail.item.children[0].value);
+        this.data.length = 0;
+        sender.selected = null;
+      }
+    },
+
+    removeTapped: function(event, detail) {
+      console.log(arguments)
+      console.log(Polymer.dom(event))
+      if (this.multiple) {
+        var value = sender.parentElement.value;
+        var index = this.value.indexOf(value);
+        this.value.splice(index, 1);
+      } else {
+        this.value = null;
+        this.clear();
+      }
+      this._focus();
+      this.commit();
+    },
+
+    /**
+     * The `paper-select-lasers` event is fired whenever `fireLasers` is called.
+     *
+     * @event paper-select-lasers
+     * @detail {{sound: String}}
+     */
+
+    /**
+     * Sometimes it's just nice to say hi.
+     *
+     * @param {string} greeting A positive greeting.
+     * @return {string} The full greeting.
+     */
+    sayHello: function(greeting) {
+      var response = greeting || 'Hello World!';
+      return 'paper-select says, ' + response;
+    },
+
+    /**
+     * Attempts to destroy this element's enemies with an any beam of light!
+     *
+     * Or, at least, dispatches an event in the vain hope that someone else will
+     * do the zapping.
+     */
+    fireLasers: function() {
+      this.fire('paper-select-lasers', {sound: 'Pew pew!'});
+    }
+
+  });
+
+</script>

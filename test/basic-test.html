@@ -17,17 +17,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <script src="../../web-component-tester/browser.js"></script>
 
     <!-- Step 1: import the element to test -->
-    <link rel="import" href="../select-input.html">
+    <link rel="import" href="../paper-select.html">
   </head>
   <body>
 
     <!-- You can use the document as a place to set up your fixtures. -->
-    <select-input></select-input>
+    <paper-select></paper-select>
 
     <script>
-      var myEl = document.querySelector('select-input');
+      var myEl = document.querySelector('paper-select');
 
-      suite('<select-input>', function() {
+      suite('<paper-select>', function() {
 
         test('defines the "author" property', function() {
           assert.equal(myEl.author.name, 'Dimitri Glazkov');
@@ -35,14 +35,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('says hello', function() {
-          assert.equal(myEl.sayHello(), 'select-input says, Hello World!');
+          assert.equal(myEl.sayHello(), 'paper-select says, Hello World!');
 
           var greetings = myEl.sayHello('greetings Earthlings');
-          assert.equal(greetings, 'select-input says, greetings Earthlings');
+          assert.equal(greetings, 'paper-select says, greetings Earthlings');
         });
 
         test('fires lasers', function(done) {
-          myEl.addEventListener('select-input-lasers', function(event) {
+          myEl.addEventListener('paper-select-lasers', function(event) {
             assert.equal(event.detail.sound, 'Pew pew!');
             done();
           });

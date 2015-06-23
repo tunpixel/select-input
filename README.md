@@ -1,4 +1,4 @@
-# &lt;select-input&gt;
+# &lt;paper-select&gt;
 
 A Polymer custom element for input selection.
 
@@ -6,38 +6,38 @@ Work based on [coner/multi-value-suggestbox](http://coner.github.io/multi-value-
 
 ## Demo
 
-[Check it live!](http://tunpixel.github.io/select-input/components/select-input/demo.html)
+[Check it live!](http://naderio.github.io/paper-select/components/paper-select/demo.html)
 
 ## Docs
 
-See the [component page](http://tunpixel.github.io/select-input) for more information.
+See the [component page](http://naderio.github.io/paper-select) for more information.
 
 ## Install
 
 Install the component using [Bower](http://bower.io/):
 
 ```sh
-$ bower install  --save select-input
+$ bower install  --save paper-select
 ```
 
-Or [download as ZIP](https://github.com/tunpixel/select-input/archive/master.zip).
+Or [download as ZIP](https://github.com/naderio/paper-select/archive/master.zip).
 
 ## Usage
 
 1. Import Custom Element:
 
     ```html
-    <link rel="import" href="bower_components/select-input/dist/select-input.html">
+    <link rel="import" href="bower_components/paper-select/dist/paper-select.html">
     ```
 
 2. Start using it!
 
     ```html
-    <select-input></select-input>
+    <paper-select></paper-select>
     ```
 
     ```html
-    <select-input multiple></select-input>
+    <paper-select multiple></paper-select>
     ```
 
 ## Usage
@@ -54,7 +54,7 @@ We welcome your bug reports and pull requests :)
 
 ## History
 
-For detailed changelog, check [Releases](https://github.com/tunpixel/select-input/releases).
+For detailed changelog, check [Releases](https://github.com/naderio/paper-select/releases).
 
 ## License
 
